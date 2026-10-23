@@ -6,7 +6,7 @@ Statische Website für GitHub Pages. Der Datenstand liegt verschlüsselt in eine
 
 - `index.html` – die App
 - `support.js` – Laufzeit
-- `_ds/…` – Schriften und Stile
+- `styles.css`, `ds-bundle.js` – Schriften und Stile
 
 Nicht enthalten: `data/stand.json` (wird verschlüsselt aus der App erzeugt) und `setup.json`.
 
