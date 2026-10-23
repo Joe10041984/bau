@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anwesen · Bahnhofstraße 66</title>
+<link rel="stylesheet" href="_ds/classical-0449d91e-30e3-4103-9fb6-d3b7df774f43/styles.css">
+<script src="_ds/classical-0449d91e-30e3-4103-9fb6-d3b7df774f43/_ds_bundle.js"></script>
+<style>
+html, body { margin: 0; padding: 0; background: var(--color-bg); }
+a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; background:var(--color-bg); color:var(--color-text); font-family:var(--font-body);">
+
+  <header data-screen-label="Kopf" style="border-bottom:1px solid var(--color-divider);">
+    <div style="max-width:1160px; margin:0 auto; padding:26px 24px 0 24px;">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;">
+          <div style="font-family:var(--font-heading); font-weight:var(--font-heading-weight); font-size:32px; line-height:1;">Anwesen</div>
+          <div style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600);">Bahnhofstraße 66, Mammendorf · Am Weinberg 13, Waldbrunn</div>
+        </div>
+        <div style="font-size:12px; color:var(--color-neutral-600); font-variant-numeric:tabular-nums;">{{ syncKurz }}</div>
+      </div>
+      <nav style="display:flex; gap:26px; margin-top:18px; overflow-x:auto;">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+          <button onClick="{{ t.go }}" style="border:none; background:none; cursor:pointer; padding:8px 2px 10px 2px; font-family:var(--font-body); font-size:14px; white-space:nowrap; color:{{ t.fg }}; border-bottom:2px solid {{ t.linie }};">{{ t.label }}</button>
+        </sc-for>
+      </nav>
+    </div>
+  </header>
+
+  <main style="flex:1; max-width:1160px; width:100%; margin:0 auto; padding:26px 24px 90px 24px; box-sizing:border-box;">
+
+    <sc-if value="{{ gesperrt }}" hint-placeholder-val="{{ false }}">
+      <div class="dialog" style="max-width:400px; margin:70px auto 0 auto; text-align:center;">
+        <div class="dialog-title">Gesperrt</div>
+        <p style="margin:0; font-size:13px; color:var(--color-neutral-700);">Die Daten sind Ende-zu-Ende verschlüsselt. Bitte mit der PIN entsperren.</p>
+        <input type="password" class="input" autoFocus="{{ true }}" placeholder="PIN" value="{{ pinEingabe }}" onChange="{{ setPinEingabe }}" onKeyDown="{{ pinKeyDown }}" style="text-align:center;">
+        <sc-if value="{{ pinFehler }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px; color:var(--color-accent-800);">{{ pinFehler }}</div>
+        </sc-if>
+        <button class="btn btn-primary btn-block" onClick="{{ entsperrenKlick }}">Entsperren</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ frei }}" hint-placeholder-val="{{ true }}">
+
+    <!-- ============ ÜBERSICHT ============ -->
+    <sc-if value="{{ tabUebersicht }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Übersicht" style="display:flex; flex-direction:column; gap:22px; animation:fadeUp .25s ease;">
+
+        <sc-if value="{{ zeigeEinrichtung }}" hint-placeholder-val="{{ false }}">
+          <div class="card" style="background:var(--color-surface);">
+            <div class="card-kicker">Einrichtung</div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <span style="font-size:13.5px; flex:1; min-width:220px;">Einrichtungs-Passwort eingeben — Zugangsdaten und Datenstand werden automatisch geladen.</span>
+              <input type="password" class="input" style="width:220px;" placeholder="Einrichtungs-Passwort" value="{{ setupPass }}" onChange="{{ setSetupPass }}" onKeyDown="{{ setupKeyDown }}">
+              <button class="btn btn-primary" onClick="{{ setupKlick }}">Verbinden</button>
+            </div>
+            <sc-if value="{{ setupFehler }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:12.5px; color:var(--color-accent-800);">{{ setupFehler }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hatWarnungen }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid var(--color-accent-300); border-radius:var(--radius-md); padding:12px 16px; font-size:13px; color:var(--color-accent-800); display:flex; flex-direction:column; gap:4px;">
+            <sc-for list="{{ warnungenIst }}" as="w" hint-placeholder-count="1">
+              <div>{{ w }}</div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:18px;">
+          <sc-for list="{{ darlehenKarten }}" as="d" hint-placeholder-count="2">
+            <div class="card">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
+                <div class="card-kicker">Darlehen {{ d.konto }}</div>
+                <span class="tag tag-neutral">Zinsbindung bis {{ d.bindung }}</span>
+              </div>
+              <div class="card-title" style="font-size:20px;">{{ d.name }} <span style="color:var(--color-neutral-600); font-size:14px; font-family:var(--font-body);">{{ d.objekt }}</span></div>
+              <div style="font-family:var(--font-heading); font-size:38px; line-height:1.05; font-variant-numeric:tabular-nums;">{{ d.restFmt }}</div>
+              <div style="font-size:12px; color:var(--color-neutral-600);">Restschuld {{ standLabel }} (ab Kontoauszug fortgeschrieben)</div>
+              <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:8px;">Tilgungsfortschritt</div>
+              <div style="height:3px; background:var(--color-neutral-200); border-radius:2px;">
+                <div style="height:3px; background:var(--color-accent); border-radius:2px; width:{{ d.pct }}%;"></div>
+              </div>
+              <div style="font-size:12px; color:var(--color-neutral-600);">Tilgung bisher: {{ d.getilgtFmt }} von {{ d.betragFmt }} ({{ d.pct }} %)</div>
+              <div class="hr" style="margin:8px 0 4px 0;"></div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; font-size:13px;">
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Rate ({{ d.zahler }})</span><span style="font-variant-numeric:tabular-nums;">{{ d.rateFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Sollzins</span><span style="font-variant-numeric:tabular-nums;">{{ d.zinsFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Sondertilgungen</span><span style="font-variant-numeric:tabular-nums;">{{ d.sonderFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Rest Ende Zinsbindung</span><span style="font-variant-numeric:tabular-nums;">{{ d.restBindFmt }}</span></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px;">
+          <sc-for list="{{ kennzahlen }}" as="k" hint-placeholder-count="4">
+            <div style="border-top:2px solid var(--color-accent); padding-top:10px;">
+              <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600);">{{ k.label }}</div>
+              <div style="font-family:var(--font-heading); font-size:26px; margin-top:4px; font-variant-numeric:tabular-nums;">{{ k.wert }}</div>
+              <div style="font-size:12px; color:var(--color-neutral-600);">{{ k.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div class="card">
+          <div class="card-kicker">Tilgungsverlauf</div>
+          <div class="card-title">Restschuld bis zum Ende der Zinsbindung</div>
+          {{ uChartSvg }}
+          <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--color-neutral-700);">
+            <sc-for list="{{ uChart.linien }}" as="l" hint-placeholder-count="3">
+              <span style="display:inline-flex; align-items:center; gap:7px;"><span style="width:16px; height:0; border-top:2px solid; color:{{ l.farbe }}; display:inline-block;"></span>{{ l.name }}</span>
+            </sc-for>
+          </div>
+          <sc-if value="{{ uHatAuswahl }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:baseline; border-top:1px dashed var(--color-divider); padding-top:10px; font-size:13px;">
+              <span style="font-family:var(--font-heading); font-size:16px;">{{ uAuswahlDatum }}</span>
+              <sc-for list="{{ uAuswahlWerte }}" as="w" hint-placeholder-count="3">
+                <span style="display:inline-flex; align-items:center; gap:7px;"><span style="width:9px; height:9px; border-radius:50%; background:{{ w.farbe }}; display:inline-block;"></span><span style="color:var(--color-neutral-600);">{{ w.name }}</span><span style="font-variant-numeric:tabular-nums;">{{ w.wert }}</span></span>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ uKeineAuswahl }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px; color:var(--color-neutral-600);">Klick in den Chart zeigt die Restschuld aller drei Linien zum gewählten Monat.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ KOSTEN ============ -->
+    <sc-if value="{{ tabKosten }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Kosten" style="display:flex; flex-direction:column; gap:22px; animation:fadeUp .25s ease;">
+        <div style="display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+          <div style="display:grid; grid-template-columns:repeat(4,minmax(140px,auto)); gap:28px;">
+            <sc-for list="{{ kostenKennzahlen }}" as="k" hint-placeholder-count="4">
+              <div style="border-top:2px solid var(--color-accent); padding-top:8px;">
+                <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600);">{{ k.label }}</div>
+                <div style="font-family:var(--font-heading); font-size:24px; margin-top:3px; font-variant-numeric:tabular-nums;">{{ k.wert }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <select class="input" style="width:190px;" value="{{ fKat }}" onChange="{{ setFKat }}">
+              <sc-for list="{{ kategorien }}" as="kat" hint-placeholder-count="5">
+                <option value="{{ kat }}">{{ kat }}</option>
+              </sc-for>
+            </select>
+            <button class="btn btn-primary" onClick="{{ kostenNeu }}">Eintrag hinzufügen</button>
+          </div>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Firma</th><th>Beschreibung</th><th>Kategorie</th>
+              <th style="text-align:right;">Kosten</th><th style="text-align:right;">Bezahlt</th>
+              <th style="text-align:right;">Offen</th><th style="text-align:right;">Handwerkeranteil</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ kostenZeilen }}" as="z" hint-placeholder-count="8">
+              <tr onClick="{{ z.onEdit }}" style="cursor:pointer;">
+                <td>{{ z.firma }}</td>
+                <td style="color:var(--color-neutral-700);">{{ z.beschreibung }}</td>
+                <td><span class="tag tag-neutral">{{ z.kategorie }}</span></td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums;">{{ z.kostenFmt }}</td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums; color:var(--color-neutral-700);">{{ z.bezahltFmt }}</td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums; color:{{ z.offenFarbe }};">{{ z.offenFmt }}</td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums; color:var(--color-neutral-700);">{{ z.handwerkerFmt }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+          <tfoot>
+            <tr style="font-weight:600;">
+              <td colSpan="3" style="border-bottom:none;">Summe ({{ kostenAnzahl }} Einträge)</td>
+              <td style="text-align:right; font-variant-numeric:tabular-nums; border-bottom:none;">{{ kSummeFmt }}</td>
+              <td style="text-align:right; font-variant-numeric:tabular-nums; border-bottom:none;">{{ kBezahltFmt }}</td>
+              <td style="text-align:right; font-variant-numeric:tabular-nums; border-bottom:none;">{{ kOffenFmt }}</td>
+              <td style="text-align:right; font-variant-numeric:tabular-nums; border-bottom:none;">{{ kHandwerkerFmt }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </sc-if>
+
+    <!-- ============ FINANZIERUNG ============ -->
+    <sc-if value="{{ tabFinanzierung }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Finanzierung" style="display:flex; flex-direction:column; gap:26px; animation:fadeUp .25s ease;">
+        <p style="max-width:70ch; margin:0; font-size:13.5px; color:var(--color-neutral-700); text-wrap:pretty;">Beide Annuitätendarlehen der ING-DiBa, Zinsbindung bis 30.12.2033, Tilgungsbeginn Oktober 2024 — davor fielen nur Zinsen an. Die Konditionen wurden nachträglich angepasst; Sollzins und Rate lassen sich unter „Einstellungen“ justieren. Sondertilgungsrecht: bis 5 % des Nennbetrags pro Kalenderjahr, mindestens 1.000 € je Zahlung.</p>
+        <sc-for list="{{ finBloecke }}" as="f" hint-placeholder-count="2">
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
+              <div style="font-family:var(--font-heading); font-size:22px;">{{ f.name }}</div>
+              <div style="font-size:12.5px; color:var(--color-neutral-600);">Konto {{ f.konto }} · {{ f.betragFmt }} · {{ f.zinsFmt }} Sollzins · Rate {{ f.rateFmt }}</div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Jahr</th><th style="text-align:right;">Zinsen</th><th style="text-align:right;">Tilgung</th>
+                  <th style="text-align:right;">Sondertilgung</th><th style="text-align:right;">Restschuld Jahresende</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ f.jahre }}" as="j" hint-placeholder-count="6">
+                  <tr style="background:{{ j.bg }};">
+                    <td style="font-variant-numeric:tabular-nums;">{{ j.jahr }}</td>
+                    <td style="text-align:right; font-variant-numeric:tabular-nums; color:var(--color-neutral-700);">{{ j.zinsenFmt }}</td>
+                    <td style="text-align:right; font-variant-numeric:tabular-nums;">{{ j.tilgungFmt }}</td>
+                    <td style="text-align:right; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">{{ j.sonderFmt }}</td>
+                    <td style="text-align:right; font-variant-numeric:tabular-nums;">{{ j.restFmt }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+            <div style="font-size:12px; color:var(--color-neutral-600);">Ab {{ standLabel }} Prognose; nach Zinsbindung mit {{ anschlussFmt }} Anschlusszins gerechnet.</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- ============ SIMULATION ============ -->
+    <sc-if value="{{ tabSimulation }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Simulation" style="display:flex; flex-direction:column; gap:22px; animation:fadeUp .25s ease;">
+        <div style="display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+          <p style="max-width:62ch; margin:0; font-size:13.5px; color:var(--color-neutral-700); text-wrap:pretty;">Jedes Szenario legt Sonderzahlungen auf den tatsächlichen Verlauf — einmalig, jährlich wiederkehrend oder beides. Das 5 %-Jahreskontingent (28.500 € Mammendorf, 16.050 € Waldbrunn) wird überwacht.</p>
+          <div style="display:flex; gap:14px; align-items:end; flex-wrap:wrap;">
+            <div class="field" style="width:150px;">
+              <label>Anschlusszins ab 2034 (%)</label>
+              <input type="number" step="0.1" min="0" class="input" value="{{ anschlussZins }}" onChange="{{ setAnschluss }}">
+            </div>
+            <div class="seg">
+              <sc-for list="{{ horizontOpts }}" as="h" hint-placeholder-count="2">
+                <label class="seg-opt"><input type="radio" name="horizont" checked="{{ h.aktiv }}" onChange="{{ h.go }}">{{ h.label }}</label>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px;">
+          <sc-for list="{{ szKarten }}" as="s" hint-placeholder-count="1">
+            <div class="card">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="width:16px; height:0; border-top:2px solid; color:{{ s.farbe }}; flex:none;"></span>
+                <input class="input" style="border:none; border-bottom:1px solid var(--color-divider); border-radius:0; padding-left:0; font-family:var(--font-heading); font-size:17px;" value="{{ s.name }}" onChange="{{ s.setName }}">
+                <button class="btn btn-ghost btn-icon" title="Szenario entfernen" onClick="{{ s.entfernen }}">✕</button>
+              </div>
+              <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:4px;">Einmalige Sonderzahlung</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                <div class="field"><label>Betrag (€)</label><input type="number" min="0" step="500" class="input" value="{{ s.einmalBetrag }}" onChange="{{ s.setEinmalBetrag }}"></div>
+                <div class="field"><label>Monat</label><input type="month" class="input" value="{{ s.einmalYm }}" onChange="{{ s.setEinmalYm }}"></div>
+                <div class="field"><label>Darlehen</label>
+                  <select class="input" value="{{ s.einmalDl }}" onChange="{{ s.setEinmalDl }}">
+                    <option value="mammendorf">Mammendorf</option><option value="weinberg">Waldbrunn</option>
+                  </select>
+                </div>
+              </div>
+              <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600); margin-top:4px;">Jährlich wiederkehrend</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                <div class="field"><label>Betrag (€/Jahr)</label><input type="number" min="0" step="500" class="input" value="{{ s.jBetrag }}" onChange="{{ s.setJBetrag }}"></div>
+                <div class="field"><label>Jeweils im</label>
+                  <select class="input" value="{{ s.jMonat }}" onChange="{{ s.setJMonat }}">
+                    <sc-for list="{{ monate }}" as="mo" hint-placeholder-count="3">
+                      <option value="{{ mo.v }}">{{ mo.label }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+                <div class="field"><label>Darlehen</label>
+                  <select class="input" value="{{ s.jDl }}" onChange="{{ s.setJDl }}">
+                    <option value="mammendorf">Mammendorf</option><option value="weinberg">Waldbrunn</option>
+                  </select>
+                </div>
+              </div>
+              <sc-if value="{{ s.warnung }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12.5px; color:var(--color-accent-800); border-top:1px dashed var(--color-divider); padding-top:8px;">{{ s.warnung }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <button class="btn btn-secondary" style="min-height:80px; border-style:dashed;" onClick="{{ szHinzu }}">+ Szenario hinzufügen</button>
+        </div>
+
+        <div class="card">
+          <div class="card-kicker">Vergleich</div>
+          <div class="card-title">Restschuld beider Darlehen zusammen</div>
+          {{ sChartSvg }}
+          <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--color-neutral-700);">
+            <sc-for list="{{ sChart.linien }}" as="l" hint-placeholder-count="2">
+              <span style="display:inline-flex; align-items:center; gap:7px;"><span style="width:16px; height:0; border-top:2px solid; color:{{ l.farbe }}; display:inline-block;"></span>{{ l.name }}</span>
+            </sc-for>
+          </div>
+          <sc-if value="{{ sHatAuswahl }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:baseline; border-top:1px dashed var(--color-divider); padding-top:10px; font-size:13px;">
+              <span style="font-family:var(--font-heading); font-size:16px;">{{ sAuswahlDatum }}</span>
+              <sc-for list="{{ sAuswahlWerte }}" as="w" hint-placeholder-count="2">
+                <span style="display:inline-flex; align-items:center; gap:7px;"><span style="width:9px; height:9px; border-radius:50%; background:{{ w.farbe }}; display:inline-block;"></span><span style="color:var(--color-neutral-600);">{{ w.name }}</span><span style="font-variant-numeric:tabular-nums;">{{ w.wert }}</span></span>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sKeineAuswahl }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px; color:var(--color-neutral-600);">Klick in den Chart zeigt die Restschuld je Szenario zum gewählten Monat.</div>
+          </sc-if>
+        </div>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Szenario</th>
+              <th style="text-align:right;">Restschuld 30.12.2033</th>
+              <th style="text-align:right;">Schuldenfrei</th>
+              <th style="text-align:right;">Zinsen gesamt</th>
+              <th style="text-align:right;">Zinsersparnis</th>
+              <th style="text-align:right;">Laufzeit kürzer um</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ szMetriken }}" as="m" hint-placeholder-count="2">
+              <tr>
+                <td><span style="display:inline-flex; align-items:center; gap:8px;"><span style="width:14px; height:0; border-top:2px solid; color:{{ m.farbe }}; display:inline-block;"></span>{{ m.name }}</span></td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums;">{{ m.restBind }}</td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;"><div>{{ m.endeM }}</div><div style="color:var(--color-neutral-600);">{{ m.endeW }}</div></td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums; color:var(--color-neutral-700);">{{ m.zinsen }}</td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums; color:var(--color-accent-800);">{{ m.ersparnis }}</td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;"><div>{{ m.kuerzerM }}</div><div style="color:var(--color-neutral-600);">{{ m.kuerzerW }}</div></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <div style="font-size:12px; color:var(--color-neutral-600);">M = Mammendorf, W = Waldbrunn. Sonderzahlungen wirken nur auf das gewählte Darlehen — das andere läuft unverändert weiter und bestimmt ggf. das spätere Schuldenfrei-Datum.</div>
+      </div>
+    </sc-if>
+
+    <!-- ============ VERTEILUNG ============ -->
+    <sc-if value="{{ tabVerteilung }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Verteilung" style="display:flex; flex-direction:column; gap:22px; animation:fadeUp .25s ease;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px;">
+          <sc-for list="{{ personKarten }}" as="p" hint-placeholder-count="2">
+            <div class="card">
+              <div class="card-kicker">{{ p.rolle }}</div>
+              <div class="card-title" style="font-size:22px;">{{ p.name }}</div>
+              <div style="font-family:var(--font-heading); font-size:34px; line-height:1.05; font-variant-numeric:tabular-nums;">{{ p.gesamtFmt }}</div>
+              <div style="font-size:12px; color:var(--color-neutral-600);">insgesamt eingebracht</div>
+              <div class="hr" style="margin:8px 0 4px 0;"></div>
+              <div style="display:flex; flex-direction:column; gap:6px; font-size:13px;">
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Eigenkapital</span><span style="font-variant-numeric:tabular-nums;">{{ p.ekFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Sondertilgungen</span><span style="font-variant-numeric:tabular-nums;">{{ p.sonderFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Raten seit Okt 2024 ({{ p.rateInfo }})</span><span style="font-variant-numeric:tabular-nums;">{{ p.ratenFmt }}</span></div>
+              </div>
+            </div>
+          </sc-for>
+          <div class="card" style="justify-content:center;">
+            <div class="card-kicker">Saldo</div>
+            <div style="font-size:15px; line-height:1.6; text-wrap:pretty;">{{ saldoText }}</div>
+            <div style="font-size:12px; color:var(--color-neutral-600); border-top:1px dashed var(--color-divider); padding-top:8px; margin-top:4px;">Die laufenden Raten werden seit Oktober 2024 automatisch fortgeschrieben — Johannes zahlt die Rate für Mammendorf, Christina für Waldbrunn. Manuelle Raten-Einträge sind nicht mehr nötig.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap;">
+          <div style="font-family:var(--font-heading); font-size:20px;">Einlagen & Sondertilgungen</div>
+          <button class="btn btn-primary" onClick="{{ verteilungNeu }}">Eintrag hinzufügen</button>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>Monat</th><th>Art</th><th>Person</th><th>Notiz</th><th style="text-align:right;">Betrag</th></tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ verteilungZeilen }}" as="z" hint-placeholder-count="8">
+              <tr onClick="{{ z.onEdit }}" style="cursor:pointer;">
+                <td style="font-variant-numeric:tabular-nums; white-space:nowrap;">{{ z.monatFmt }}</td>
+                <td><span class="tag {{ z.tagKlasse }}">{{ z.typLabel }}</span></td>
+                <td>{{ z.person }}</td>
+                <td style="color:var(--color-neutral-700); font-size:13px;">{{ z.notiz }}</td>
+                <td style="text-align:right; font-variant-numeric:tabular-nums;">{{ z.betragFmt }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <!-- ============ EINSTELLUNGEN ============ -->
+    <sc-if value="{{ tabEinstellungen }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Einstellungen" style="display:flex; flex-direction:column; gap:22px; max-width:760px; animation:fadeUp .25s ease;">
+
+        <div class="card">
+          <div class="card-kicker">Darlehen</div>
+          <div class="card-title">Konditionen</div>
+          <p class="card-body" style="text-wrap:pretty;">Tatsächlich geltende Konditionen laut Vertrag. Die Prognose rechnet mit diesen Zahlen und setzt die Restschuld am Kontoauszug-Stichtag auf den Ist-Wert.</p>
+          <sc-for list="{{ sDarlehen }}" as="d" hint-placeholder-count="2">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:14px; align-items:end; border-top:1px solid var(--color-divider); padding-top:12px;">
+              <div style="grid-column:1 / -1;">
+                <div style="font-family:var(--font-heading); font-size:16px;">{{ d.name }}</div>
+                <div style="font-size:12px; color:var(--color-neutral-600);">Konto {{ d.konto }} · {{ d.betragFmt }} · Rate zahlt {{ d.zahler }}</div>
+              </div>
+              <div class="field"><label>Sollzins (% p.a.)</label><input type="number" step="0.01" class="input" value="{{ d.zins }}" onChange="{{ d.setZins }}"></div>
+              <div class="field"><label>Monatliche Rate (€)</label><input type="number" step="0.01" class="input" value="{{ d.rate }}" onChange="{{ d.setRate }}"></div>
+              <div class="field"><label>Kontoauszug Stichtag</label><input type="month" class="input" value="{{ d.istYm }}" onChange="{{ d.setIstYm }}"></div>
+              <div class="field"><label>Restschuld lt. Auszug (€)</label><input type="number" step="0.01" class="input" value="{{ d.istRest }}" onChange="{{ d.setIstRest }}"></div>
+            </div>
+          </sc-for>
+          <div style="display:grid; grid-template-columns:1fr 150px; gap:14px; align-items:end; border-top:1px solid var(--color-divider); padding-top:12px;">
+            <div style="font-size:13px; color:var(--color-neutral-700);">Anschlusszins nach der Zinsbindung (Annahme für die Prognose)</div>
+            <div class="field"><label>Zins (% p.a.)</label><input type="number" step="0.1" class="input" value="{{ anschlussZins }}" onChange="{{ setAnschluss }}"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-kicker">Geräte-Sync</div>
+          <div class="card-title">GitHub — privater Gist</div>
+          <p class="card-body" style="text-wrap:pretty;">Der Datenstand wird als anwesen-stand.json in einem privaten Gist gehalten — mit PIN Ende-zu-Ende verschlüsselt (AES-256, PBKDF2). Token braucht nur das „gist“-Recht. „Jetzt hochladen“ ohne Gist-ID legt den Gist an.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>GitHub-Token</label><input type="password" class="input" value="{{ syncToken }}" onChange="{{ setSyncToken }}" placeholder="ghp_…"></div>
+            <div class="field"><label>Gist-ID</label><input class="input" value="{{ syncGist }}" onChange="{{ setSyncGist }}" placeholder="wird beim ersten Hochladen erzeugt"></div>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onClick="{{ syncHoch }}">Jetzt hochladen</button>
+            <button class="btn btn-secondary" onClick="{{ syncRunter }}">Vom Gist laden</button>
+            <button class="btn btn-ghost" onClick="{{ standRunter }}">Stand als Datei sichern</button>
+          </div>
+          <sc-if value="{{ syncStatus }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px; color:var(--color-neutral-700);">{{ syncStatus }}</div>
+          </sc-if>
+        </div>
+
+        <div class="card">
+          <div class="card-kicker">Neue Geräte</div>
+          <div class="card-title">Verschlüsselte Dateien fürs Repo</div>
+          <p class="card-body" style="text-wrap:pretty;">Beide Dateien werden mit dem Einrichtungs-Passwort verschlüsselt (AES-256-GCM, 600.000 PBKDF2-Iterationen). setup.json enthält Token und Gist-ID, data/stand.json den Datenstand. Neue Geräte brauchen dann nur das Passwort. Dasselbe Passwort für beide verwenden.</p>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input type="password" class="input" style="width:240px;" placeholder="Einrichtungs-Passwort" value="{{ setupCodePass }}" onChange="{{ setSetupCodePass }}">
+            <button class="btn btn-secondary" onClick="{{ setupErzeugen }}">setup.json erzeugen</button>
+            <button class="btn btn-secondary" onClick="{{ standVerschluesseln }}">stand.json verschlüsseln</button>
+          </div>
+          <sc-if value="{{ setupCodeInfo }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px; color:var(--color-neutral-700);">{{ setupCodeInfo }}</div>
+          </sc-if>
+        </div>
+
+        <div class="card">
+          <div class="card-kicker">Sicherheit</div>
+          <div class="card-title">PIN-Sperre & Verschlüsselung</div>
+          <p class="card-body" style="text-wrap:pretty;">Verlangt beim Öffnen eine PIN und verschlüsselt damit alles Ende-zu-Ende: das GitHub-Token im Browser und den kompletten Datenstand im Gist. Feld leeren und speichern entfernt die Sperre. PIN sicher im Passwortmanager aufbewahren — ohne PIN sind die Daten nicht wiederherstellbar.</p>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <input type="password" class="input" style="width:240px;" placeholder="{{ pinPlatzhalter }}" value="{{ pinNeu }}" onChange="{{ setPinNeu }}">
+            <button class="btn btn-secondary" onClick="{{ pinSpeichern }}">Speichern</button>
+          </div>
+          <sc-if value="{{ pinInfo }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px; color:var(--color-neutral-700);">{{ pinInfo }}</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    </sc-if>
+  </main>
+
+  <!-- ============ MODAL ============ -->
+  <sc-if value="{{ mv }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:60;" onClick="{{ modalZu }}">
+      <div class="dialog" style="width:min(560px,100%);" onClick="{{ stopp }}">
+        <div class="dialog-title">{{ mv.titel }}</div>
+        <sc-if value="{{ mv.istKosten }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="field"><label>Firma</label><input class="input" value="{{ mv.firma }}" onChange="{{ mv.setFirma }}"></div>
+            <div class="field"><label>Beschreibung</label><input class="input" value="{{ mv.beschreibung }}" onChange="{{ mv.setBeschreibung }}"></div>
+            <div class="field"><label>Kategorie</label><input class="input" value="{{ mv.kategorie }}" onChange="{{ mv.setKategorie }}" list="kategorien-liste"></div>
+            <div class="field"><label>Kosten (€)</label><input type="number" step="0.01" class="input" value="{{ mv.kosten }}" onChange="{{ mv.setKosten }}"></div>
+            <div class="field"><label>Bezahlt (€)</label><input type="number" step="0.01" class="input" value="{{ mv.bezahlt }}" onChange="{{ mv.setBezahlt }}"></div>
+            <div class="field"><label>Anteil Handwerkerkosten (€)</label><input type="number" step="0.01" class="input" value="{{ mv.handwerker }}" onChange="{{ mv.setHandwerker }}"></div>
+          </div>
+          <datalist id="kategorien-liste">
+            <sc-for list="{{ kategorienRoh }}" as="kat" hint-placeholder-count="5">
+              <option value="{{ kat }}"></option>
+            </sc-for>
+          </datalist>
+        </sc-if>
+        <sc-if value="{{ mv.istVerteilung }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="field"><label>Art</label>
+              <select class="input" value="{{ mv.typ }}" onChange="{{ mv.setTyp }}">
+                <option value="EK">Eigenkapital</option><option value="Sondertilgung">Sondertilgung</option>
+              </select>
+            </div>
+            <div class="field"><label>Person</label>
+              <select class="input" value="{{ mv.person }}" onChange="{{ mv.setPerson }}">
+                <option value="Johannes">Johannes</option><option value="Christina">Christina</option>
+              </select>
+            </div>
+            <div class="field"><label>Jahr</label><input type="number" class="input" value="{{ mv.jahr }}" onChange="{{ mv.setJahr }}"></div>
+            <div class="field"><label>Monat</label>
+              <select class="input" value="{{ mv.monat }}" onChange="{{ mv.setMonat }}">
+                <sc-for list="{{ monate }}" as="mo" hint-placeholder-count="3">
+                  <option value="{{ mo.v }}">{{ mo.label }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field"><label>Betrag (€)</label><input type="number" step="0.01" class="input" value="{{ mv.betrag }}" onChange="{{ mv.setBetrag }}"></div>
+            <sc-if value="{{ mv.istSonder }}" hint-placeholder-val="{{ false }}">
+              <div class="field"><label>Darlehen</label>
+                <select class="input" value="{{ mv.darlehen }}" onChange="{{ mv.setDarlehen }}">
+                  <option value="mammendorf">Mammendorf</option><option value="weinberg">Waldbrunn</option>
+                </select>
+              </div>
+            </sc-if>
+            <div class="field" style="grid-column:1 / -1;"><label>Notiz</label><input class="input" value="{{ mv.notiz }}" onChange="{{ mv.setNotiz }}"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ mv.fehler }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px; color:var(--color-accent-800);">{{ mv.fehler }}</div>
+        </sc-if>
+        <div class="dialog-actions" style="display:flex; gap:10px; justify-content:space-between;">
+          <div>
+            <sc-if value="{{ mv.kannLoeschen }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-ghost" onClick="{{ mv.loeschen }}">Löschen</button>
+            </sc-if>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-secondary" onClick="{{ modalZu }}">Abbrechen</button>
+            <button class="btn btn-primary" onClick="{{ mv.speichern }}">Speichern</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;zeigeCents&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;horizontStandard&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Zinsbindung&quot;, &quot;Volltilgung&quot;], &quot;default&quot;: &quot;Zinsbindung&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    let stand = null;
+    try { stand = JSON.parse(localStorage.getItem('anwesen.stand.v1') || 'null'); } catch (e) {}
+    this.state = {
+      stand: stand || { kosten: [], verteilung: [], darlehen: null, einstellungen: {} },
+      geladen: !!stand,
+      tab: 'uebersicht',
+      fKat: 'Alle',
+      modal: null,
+      horizont: (props.horizontStandard || 'Zinsbindung') === 'Volltilgung' ? 'ende' : 'bindung',
+      szenarien: [{ id: 's1', name: '10.000 € jährlich extra', einmalBetrag: '', einmalYm: '2026-12', einmalDl: 'mammendorf', jBetrag: '10000', jMonat: 12, jDl: 'mammendorf' }],
+      gesperrt: !!(stand && stand.einstellungen && stand.einstellungen.sperreHash) && sessionStorage.getItem('anwesen.entsperrt') !== '1',
+      pinEingabe: '', pinFehler: null, pinNeu: '', pinInfo: null,
+      setupBlob: null, setupPass: '', setupFehler: null, setupCodePass: '', setupCodeInfo: null,
+      sync: (() => { try { const r = JSON.parse(localStorage.getItem('anwesen.sync.v1') || 'null') || {}; return r.enc ? { token: '', gistId: r.gistId || '' } : { token: r.token || '', gistId: r.gistId || '' }; } catch (e) { return { token: '', gistId: '' }; } })(),
+      syncStatus: null,
+      uAuswahl: null, sAuswahl: null,
+      eingerichtetFlag: localStorage.getItem('anwesen.eingerichtet.v1') === '1'
+    };
+    this.fmtC = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
+    this.fmtC0 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+    this.monNamen = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    this.monVoll = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  }
+  fmt(v) { return (this.props.zeigeCents ? this.fmtC : this.fmtC0).format(v || 0); }
+  fmt2(v) { return this.fmtC.format(v || 0); }
+  ymNum(j, m) { return j * 12 + m - 1; }
+  numYm(n) { return { j: Math.floor(n / 12), m: n % 12 + 1 }; }
+  fmtYm(n) { const d = this.numYm(n); return this.monNamen[d.m - 1] + ' ' + d.j; }
+  // Letzter abgerechneter Monat: die ING bucht Rate und Zinsen erst am 30.
+  heuteYm() { const d = new Date(); return this.ymNum(d.getFullYear(), d.getMonth() + 1) - (d.getDate() < 30 ? 1 : 0); }
+
+  // ---------- Krypto (Architektur wie PKV-Dashboard) ----------
+  async pinHash(pin) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('anwesen:' + pin));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  b64(bytes) { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
+  b64ab(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+  syncRoh() { try { return JSON.parse(localStorage.getItem('anwesen.sync.v1') || 'null'); } catch (e) { return null; } }
+  async schluesselImport(bytes) {
+    const key = await crypto.subtle.importKey('raw', bytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    return { key, raw: this.b64(bytes) };
+  }
+  async schluesselAusPin(pin, saltB64) {
+    const mat = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: this.b64ab(saltB64), iterations: 310000, hash: 'SHA-256' }, mat, 256);
+    return this.schluesselImport(new Uint8Array(bits));
+  }
+  async syncEntschluesseln(roh, key) {
+    const klar = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(roh.iv) }, key, this.b64ab(roh.enc));
+    const g = JSON.parse(new TextDecoder().decode(klar));
+    return { token: g.token || '', gistId: roh.gistId || '' };
+  }
+  tresorRoh() { try { return JSON.parse(localStorage.getItem('anwesen.tresor.v1') || 'null'); } catch (e) { return null; } }
+  async datenKeyErmitteln(tresor) {
+    if (this._datenKey) return this._datenKey;
+    const raw = sessionStorage.getItem('anwesen.datenschluessel');
+    if (raw) { try { this._datenKey = (await this.schluesselImport(this.b64ab(raw))).key; return this._datenKey; } catch (e) {} }
+    const t = tresor || this.tresorRoh();
+    if (t && this._pin) {
+      try {
+        const k = await this.schluesselAusPin(this._pin, t.salt);
+        const bytes = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(t.iv) }, k.key, this.b64ab(t.key)));
+        const imp = await this.schluesselImport(bytes);
+        this._datenKey = imp.key;
+        sessionStorage.setItem('anwesen.datenschluessel', imp.raw);
+        localStorage.setItem('anwesen.tresor.v1', JSON.stringify(t));
+        return this._datenKey;
+      } catch (e) {}
+    }
+    return null;
+  }
+  async datenKeyErzeugen() {
+    const bytes = crypto.getRandomValues(new Uint8Array(32));
+    const imp = await this.schluesselImport(bytes);
+    this._datenKey = imp.key;
+    sessionStorage.setItem('anwesen.datenschluessel', imp.raw);
+    const salt = this.b64(crypto.getRandomValues(new Uint8Array(16)));
+    const k = await this.schluesselAusPin(this._pin, salt);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k.key, bytes);
+    localStorage.setItem('anwesen.tresor.v1', JSON.stringify({ salt, iv: this.b64(iv), key: this.b64(new Uint8Array(ct)) }));
+    return this._datenKey;
+  }
+  async syncPersistieren(c) {
+    if (this._pinKey && this._pinSalt && c.token) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const geheim = new TextEncoder().encode(JSON.stringify({ token: c.token || '' }));
+      const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, this._pinKey, geheim);
+      localStorage.setItem('anwesen.sync.v1', JSON.stringify({ enc: this.b64(new Uint8Array(enc)), iv: this.b64(iv), salt: this._pinSalt, gistId: c.gistId || '' }));
+    } else {
+      localStorage.setItem('anwesen.sync.v1', JSON.stringify(c));
+    }
+  }
+  async syncStart() {
+    const roh = this.syncRoh();
+    if (roh && roh.enc) {
+      const raw = sessionStorage.getItem('anwesen.schluessel');
+      if (raw) {
+        try {
+          const k = await this.schluesselImport(this.b64ab(raw));
+          const sync = await this.syncEntschluesseln(roh, k.key);
+          this._pinKey = k.key; this._pinSalt = roh.salt;
+          this.setState({ sync });
+          if (sync.token && sync.gistId) this.syncLoad(true);
+        } catch (e) { sessionStorage.removeItem('anwesen.schluessel'); }
+      }
+      return;
+    }
+    if (this.state.sync && this.state.sync.token && this.state.sync.gistId) { this.syncLoad(true); }
+    else fetch('setup.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(b => { if (b && b.daten) this.setState({ setupBlob: b }); }).catch(() => {});
+  }
+  async setupSchluessel(pass, salt) {
+    const mat = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: 600000, hash: 'SHA-256' }, mat, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async setupVerschluesseln(pass, obj) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await this.setupSchluessel(pass, salt);
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
+    const b = a => btoa(String.fromCharCode(...new Uint8Array(a)));
+    return JSON.stringify({ v: 1, salt: b(salt), iv: b(iv), daten: b(ct) }, null, 1);
+  }
+  async setupEntschluesseln(pass, blob) {
+    const u8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const key = await this.setupSchluessel(pass, u8(blob.salt));
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u8(blob.iv) }, key, u8(blob.daten));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  async setupAnwenden() {
+    const pass = (this.state.setupPass || '').trim();
+    if (!pass) { this.setState({ setupFehler: 'Bitte Passwort eingeben.' }); return; }
+    this.setState({ setupFehler: null });
+    try {
+      if (this.state.standBlob) this.standUebernehmen(await this.setupEntschluesseln(pass, this.state.standBlob));
+      if (this.state.setupBlob && !this.state.sync.token) {
+        const c = await this.setupEntschluesseln(pass, this.state.setupBlob);
+        if (!c.token || !c.gistId) throw new Error('unvollständig');
+        this.speichereSync({ token: c.token, gistId: c.gistId });
+        this.setState({ setupPass: '' });
+        await this.syncLoad(false);
+      }
+      this.setState({ setupPass: '' });
+    } catch (e) {
+      this.setState({ setupFehler: 'Entschlüsselung fehlgeschlagen — Passwort falsch?' });
+    }
+  }
+  async entsperren() {
+    const pin = this.state.pinEingabe || '';
+    const hash = await this.pinHash(pin);
+    if (hash !== (this.state.stand.einstellungen || {}).sperreHash) {
+      this.setState({ pinFehler: 'PIN falsch.', pinEingabe: '' });
+      return;
+    }
+    sessionStorage.setItem('anwesen.entsperrt', '1');
+    this._pin = pin;
+    let syncNeu = null;
+    try {
+      const roh = this.syncRoh();
+      if (roh && roh.enc) {
+        const k = await this.schluesselAusPin(pin, roh.salt);
+        syncNeu = await this.syncEntschluesseln(roh, k.key);
+        this._pinKey = k.key; this._pinSalt = roh.salt;
+        sessionStorage.setItem('anwesen.schluessel', k.raw);
+      } else if (roh && roh.token) {
+        const salt = this.b64(crypto.getRandomValues(new Uint8Array(16)));
+        const k = await this.schluesselAusPin(pin, salt);
+        this._pinKey = k.key; this._pinSalt = salt;
+        sessionStorage.setItem('anwesen.schluessel', k.raw);
+        await this.syncPersistieren(this.state.sync);
+      }
+    } catch (e) {}
+    try { await this.datenKeyErmitteln(null); } catch (e) {}
+    this.setState({ gesperrt: false, pinEingabe: '', pinFehler: null, ...(syncNeu ? { sync: syncNeu } : {}) }, () => {
+      const c = this.state.sync;
+      if (c && c.token && c.gistId) this.syncLoad(true);
+    });
+  }
+  componentDidMount() {
+    this.syncStart();
+    // data/stand.json übernehmen, wenn lokal nichts liegt oder die Datei neuer ist als der lokale Stand
+    // Verschlüsselte Variante ({v,salt,iv,daten}) wartet auf das Einrichtungs-Passwort; Klartext nur als Entwicklungs-Fallback.
+    const lokalTs = localStorage.getItem('anwesen.stand.ts') || '';
+    fetch('data/stand.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(s => {
+      const neuer = !this.state.geladen || (s.gespeichert && s.gespeichert > lokalTs);
+      if (!neuer) return;
+      if (s.daten && s.salt) { this.setState({ standBlob: s }); return; }
+      this.standUebernehmen(s);
+    }).catch(() => this.setState({ geladen: true }));
+  }
+  standUebernehmen(s) {
+    const alt = this.state.stand || {};
+    this.setState({ stand: { kosten: s.kosten || [], verteilung: s.verteilung || [], darlehen: s.darlehen, einstellungen: { ...(alt.einstellungen || {}), ...(s.einstellungen || {}) } }, geladen: true, standBlob: null }, () => this.persist(true));
+  }
+  persist(ohneUpload) {
+    localStorage.setItem('anwesen.stand.v1', JSON.stringify(this.state.stand));
+    localStorage.setItem('anwesen.stand.ts', new Date().toISOString());
+    if (!ohneUpload && this.state.sync && this.state.sync.token && this.state.sync.gistId) {
+      clearTimeout(this._syncT);
+      this._syncT = setTimeout(() => this.syncUpload(true), 2500);
+    }
+  }
+  setStand(patch, ohneUpload) {
+    this.setState(s => ({ stand: { ...s.stand, ...patch } }), () => this.persist(ohneUpload));
+  }
+  syncHeaders() { return { Authorization: 'Bearer ' + this.state.sync.token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }; }
+  standObjekt() { return { gespeichert: new Date().toISOString(), ...this.state.stand }; }
+  speichereSync(c) { this.setState({ sync: c }); this.syncPersistieren(c); }
+  async syncUpload(auto) {
+    const c = this.state.sync;
+    if (!c.token) { if (!auto) this.setState({ syncStatus: 'Bitte zuerst ein GitHub-Token eintragen.' }); return; }
+    try {
+      if (!auto) this.setState({ syncStatus: 'Lade hoch …' });
+      const stand = this.standObjekt();
+      let dateiInhalt;
+      const sperre = (this.state.stand.einstellungen || {}).sperreHash;
+      if (sperre) {
+        let key = await this.datenKeyErmitteln(null);
+        if (!key && this._pin) key = await this.datenKeyErzeugen();
+        if (!key) { this.setState({ syncStatus: 'Hochladen wartet — zum verschlüsselten Sync bitte einmal mit der PIN entsperren.' }); return; }
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(stand)));
+        dateiInhalt = JSON.stringify({ verschluesselt: true, gespeichert: stand.gespeichert, sperreHash: sperre, tresor: this.tresorRoh(), iv: this.b64(iv), daten: this.b64(new Uint8Array(ct)) }, null, 1);
+      } else {
+        dateiInhalt = JSON.stringify(stand, null, 1);
+      }
+      const files = { 'anwesen-stand.json': { content: dateiInhalt } };
+      let r;
+      if (c.gistId) r = await fetch('https://api.github.com/gists/' + c.gistId.trim(), { method: 'PATCH', headers: this.syncHeaders(), body: JSON.stringify({ files }) });
+      else r = await fetch('https://api.github.com/gists', { method: 'POST', headers: this.syncHeaders(), body: JSON.stringify({ description: 'Anwesen — privater Daten-Stand', public: false, files }) });
+      if (!r.ok) throw new Error('GitHub-Fehler ' + r.status + (r.status === 401 ? ' — Token ungültig?' : r.status === 404 ? ' — Gist-ID falsch oder Token ohne „gist“-Recht?' : ''));
+      const j = await r.json();
+      const neu = !c.gistId && j.id;
+      if (neu) this.speichereSync({ ...c, gistId: j.id });
+      localStorage.setItem('anwesen.sync.ts', stand.gespeichert);
+      localStorage.setItem('anwesen.eingerichtet.v1', '1');
+      this.setState({ syncStatus: 'Hochgeladen (' + stand.gespeichert.slice(11, 16) + ' Uhr)' + (neu ? ' — privater Gist angelegt, ID wurde übernommen.' : '.'), eingerichtetFlag: true });
+    } catch (err) {
+      this.setState({ syncStatus: 'Hochladen fehlgeschlagen: ' + (err && err.message ? err.message : err) });
+    }
+  }
+  async syncLoad(auto) {
+    const c = this.state.sync;
+    if (!c.token || !c.gistId) { if (!auto) this.setState({ syncStatus: 'Token und Gist-ID nötig — oder erst „Jetzt hochladen“ (legt den Gist an).' }); return; }
+    try {
+      if (!auto) this.setState({ syncStatus: 'Lade vom Gist …' });
+      const r = await fetch('https://api.github.com/gists/' + c.gistId.trim(), { headers: this.syncHeaders() });
+      if (!r.ok) throw new Error('GitHub-Fehler ' + r.status + (r.status === 401 ? ' — Token ungültig?' : r.status === 404 ? ' — Gist nicht gefunden?' : ''));
+      const j = await r.json();
+      const f = j.files && j.files['anwesen-stand.json'];
+      if (!f) throw new Error('anwesen-stand.json nicht im Gist gefunden');
+      let s = JSON.parse(f.truncated ? await (await fetch(f.raw_url)).text() : f.content);
+      if (s && s.verschluesselt) {
+        const key = await this.datenKeyErmitteln(s.tresor);
+        if (!key) {
+          if (s.sperreHash) this.setStand({ einstellungen: { ...this.state.stand.einstellungen, sperreHash: s.sperreHash } }, true);
+          this.setState({ gesperrt: sessionStorage.getItem('anwesen.entsperrt') !== '1', syncStatus: 'Daten sind Ende-zu-Ende verschlüsselt — zum Laden bitte mit der PIN entsperren.' });
+          return;
+        }
+        const klar = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(s.iv) }, key, this.b64ab(s.daten));
+        s = JSON.parse(new TextDecoder().decode(klar));
+      }
+      if (!Array.isArray(s.kosten)) throw new Error('kein gültiger Stand in der Datei');
+      const remoteTs = s.gespeichert || '';
+      if (auto) {
+        if (remoteTs && remoteTs <= (localStorage.getItem('anwesen.sync.ts') || '')) return;
+        const lokalTs = localStorage.getItem('anwesen.stand.ts') || '';
+        if (lokalTs && remoteTs && remoteTs < lokalTs) { this.syncUpload(true); return; }
+      }
+      const einst = s.einstellungen || {};
+      const sperren = !!einst.sperreHash && sessionStorage.getItem('anwesen.entsperrt') !== '1';
+      this.setState({ stand: { kosten: s.kosten, verteilung: s.verteilung || [], darlehen: s.darlehen, einstellungen: einst }, geladen: true, eingerichtetFlag: true, gesperrt: sperren }, () => this.persist(true));
+      localStorage.setItem('anwesen.sync.ts', remoteTs);
+      localStorage.setItem('anwesen.eingerichtet.v1', '1');
+      this.setState({ syncStatus: (auto ? 'Automatisch geladen' : 'Geladen') + ' (Stand ' + String(remoteTs).slice(0, 16).replace('T', ' ') + ').' });
+    } catch (err) {
+      this.setState({ syncStatus: 'Laden fehlgeschlagen: ' + (err && err.message ? err.message : err) });
+    }
+  }
+  standHerunterladen() {
+    const blob = new Blob([JSON.stringify(this.standObjekt(), null, 1)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'anwesen-stand.json';
+    a.click();
+  }
+
+  // ---------- Tilgungssimulation ----------
+  sim(dlKey, extra, anschluss) {
+    const dl = (this.state.stand.darlehen || {})[dlKey];
+    if (!dl) return null;
+    const start = this.ymNum(dl.startJahr, dl.startMonat);
+    const bind = this.ymNum(dl.bindungJahr, dl.bindungMonat);
+    const sonder = {};
+    (this.state.stand.verteilung || []).forEach(v => {
+      if (v.typ === 'Sondertilgung' && (v.darlehen || 'mammendorf') === dlKey) {
+        const n = this.ymNum(+v.jahr, +v.monat);
+        sonder[n] = (sonder[n] || 0) + (+v.betrag || 0);
+      }
+    });
+    (extra || []).forEach(e => { if (e.dl === dlKey && e.betrag > 0) sonder[e.n] = (sonder[e.n] || 0) + e.betrag; });
+    let saldo = dl.betrag, zinsen = 0, ende = null, restBind = 0;
+    const punkte = [[start - 1, saldo]];
+    const jahre = {};
+    const istN = dl.istJahr && dl.istMonat && dl.istRest > 0 ? this.ymNum(+dl.istJahr, +dl.istMonat) : null;
+    for (let n = start; n < start + 780; n++) {
+      const j = this.numYm(n).j;
+      const zs = (n <= bind ? +dl.zins : anschluss) / 1200 * saldo;
+      zinsen += zs;
+      let tilg = Math.max(0, +dl.rate - zs);
+      saldo -= tilg;
+      const so = Math.min(sonder[n] || 0, Math.max(saldo, 0));
+      saldo -= so;
+      // Kontoauszug als Anker: Restschuld am Stichtag auf den Ist-Wert setzen
+      if (istN !== null && n === istN) { tilg += saldo - +dl.istRest; saldo = +dl.istRest; }
+      if (saldo < 0) saldo = 0;
+      const ja = jahre[j] = jahre[j] || { zins: 0, tilg: 0, sonder: 0, rest: 0 };
+      ja.zins += zs; ja.tilg += tilg; ja.sonder += so; ja.rest = saldo;
+      punkte.push([n, saldo]);
+      if (n === bind) restBind = saldo;
+      if (saldo <= 0.005) { ende = n; break; }
+    }
+    return { punkte, zinsen, ende, restBind, dl, start, bind, jahre, sonderIst: sonder };
+  }
+  saldoBei(simErg, n) {
+    let s = simErg.dl.betrag;
+    for (const p of simErg.punkte) { if (p[0] > n) break; s = p[1]; }
+    return s;
+  }
+  kombiPunkte(a, b) {
+    const map = new Map();
+    [a, b].forEach(s => s.punkte.forEach(p => map.set(p[0], (map.get(p[0]) || 0))));
+    const ns = [...map.keys()].sort((x, y) => x - y);
+    return ns.map(n => [n, this.saldoBei(a, n) * (n >= a.punkte[0][0] ? 1 : 1) + this.saldoBei(b, n)]);
+  }
+  szenarioExtra(sz) {
+    const ex = [];
+    const eb = parseFloat(sz.einmalBetrag);
+    if (eb > 0 && sz.einmalYm && /^\d{4}-\d{2}$/.test(sz.einmalYm)) {
+      const t = sz.einmalYm.split('-');
+      ex.push({ dl: sz.einmalDl, n: this.ymNum(+t[0], +t[1]), betrag: eb });
+    }
+    const jb = parseFloat(sz.jBetrag);
+    if (jb > 0) {
+      const heute = this.heuteYm();
+      for (let j = this.numYm(heute).j; j <= this.numYm(heute).j + 45; j++) {
+        const n = this.ymNum(j, +sz.jMonat || 12);
+        if (n > heute) ex.push({ dl: sz.jDl, n, betrag: jb });
+      }
+    }
+    return ex;
+  }
+  kontingentWarnungen(extra, praefix) {
+    const per = {};
+    (this.state.stand.verteilung || []).forEach(v => {
+      if (v.typ === 'Sondertilgung') { const k = v.jahr + '|' + (v.darlehen || 'mammendorf'); per[k] = (per[k] || 0) + (+v.betrag || 0); }
+    });
+    (extra || []).forEach(e => { const k = this.numYm(e.n).j + '|' + e.dl; per[k] = (per[k] || 0) + e.betrag; });
+    const out = [];
+    Object.keys(per).sort().forEach(k => {
+      const t = k.split('|');
+      const dl = (this.state.stand.darlehen || {})[t[1]];
+      if (!dl) return;
+      const limit = dl.betrag * 0.05;
+      if (per[k] > limit + 0.01) out.push(praefix + t[0] + ': ' + this.fmt(per[k]) + ' Sondertilgung auf ' + dl.name + ' überschreitet das 5 %-Kontingent von ' + this.fmt(limit) + '.');
+    });
+    return out;
+  }
+  wertBei(punkte, n) { let w = punkte.length ? punkte[0][1] : 0; for (const p of punkte) { if (p[0] > n) break; w = p[1]; } return w; }
+  chart(serien, n1, auswahlN) {
+    const n0 = this.ymNum(2024, 9);
+    const W = 860, H = 300, L = 64, R = 14, T = 14, B = 34;
+    let ymax = 0;
+    serien.forEach(s => s.punkte.forEach(p => { if (p[0] <= n1 && p[1] > ymax) ymax = p[1]; }));
+    ymax = Math.max(100000, Math.ceil(ymax / 100000) * 100000);
+    const X = n => L + (n - n0) / Math.max(1, n1 - n0) * (W - L - R);
+    const Y = v => T + (1 - v / ymax) * (H - T - B);
+    const linien = serien.map(s => {
+      const pts = s.punkte.filter(p => p[0] <= n1);
+      if (s.punkte.length && s.punkte[s.punkte.length - 1][0] < n1) pts.push([n1, s.punkte[s.punkte.length - 1][1]]);
+      return { name: s.name, farbe: s.farbe, dash: s.dash || 'none', d: pts.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join(' ') };
+    });
+    const grid = [];
+    for (let v = 0; v <= ymax; v += ymax / 4) grid.push({ y: +Y(v).toFixed(1), label: Math.round(v / 1000) + ' T€' });
+    const xticks = [];
+    const spanne = this.numYm(n1).j - 2025;
+    const schritt = spanne > 14 ? 4 : spanne > 10 ? 2 : 1;
+    for (let j = 2025; j <= this.numYm(n1).j; j += schritt) xticks.push({ x: +X(this.ymNum(j, 1)).toFixed(1), label: String(j) });
+    const erg = { linien, grid, xticks, n0, n1 };
+    if (auswahlN != null && auswahlN >= n0 && auswahlN <= n1) {
+      erg.auswahl = {
+        n: auswahlN, x: +X(auswahlN).toFixed(1),
+        punkte: serien.map(s => { const w = this.wertBei(s.punkte, auswahlN); return { farbe: s.farbe, name: s.name, wert: w, y: +Y(w).toFixed(1) }; })
+      };
+    }
+    return erg;
+  }
+  chartSvg(ch, art) {
+    const H = React.createElement;
+    const kinder = [];
+    ch.grid.forEach((g, i) => {
+      kinder.push(H('line', { key: 'g' + i, x1: 64, x2: 846, y1: g.y, y2: g.y, stroke: 'var(--color-neutral-200)', strokeWidth: 1 }));
+      kinder.push(H('text', { key: 'gt' + i, x: 56, y: g.y, textAnchor: 'end', dominantBaseline: 'middle', fontSize: 11, fill: 'var(--color-neutral-600)', style: { fontVariantNumeric: 'tabular-nums' } }, g.label));
+    });
+    kinder.push(H('line', { key: 'ax', x1: 64, x2: 846, y1: 266, y2: 266, stroke: 'var(--color-neutral-400)', strokeWidth: 1 }));
+    ch.xticks.forEach((x, i) => {
+      kinder.push(H('line', { key: 'xl' + i, x1: x.x, x2: x.x, y1: 266, y2: 271, stroke: 'var(--color-neutral-400)', strokeWidth: 1 }));
+      kinder.push(H('text', { key: 'xt' + i, x: x.x, y: 288, textAnchor: 'middle', fontSize: 11, fill: 'var(--color-neutral-600)', style: { fontVariantNumeric: 'tabular-nums' } }, x.label));
+    });
+    ch.linien.forEach((l, i) => kinder.push(H('path', { key: 'p' + i, d: l.d, fill: 'none', stroke: l.farbe, strokeWidth: 1.8, strokeDasharray: l.dash === 'none' ? undefined : l.dash })));
+    if (ch.auswahl) {
+      kinder.push(H('line', { key: 'm', x1: ch.auswahl.x, x2: ch.auswahl.x, y1: 14, y2: 266, stroke: 'var(--color-accent-700)', strokeWidth: 1, strokeDasharray: '3 3' }));
+      ch.auswahl.punkte.forEach((p, i) => kinder.push(H('circle', { key: 'c' + i, cx: ch.auswahl.x, cy: p.y, r: 3.5, fill: p.farbe, stroke: 'var(--color-bg)', strokeWidth: 1.5 })));
+    }
+    return H('svg', {
+      viewBox: '0 0 860 300',
+      style: { width: '100%', height: 'auto', display: 'block', cursor: 'crosshair' },
+      onClick: ev => {
+        const r = ev.currentTarget.getBoundingClientRect();
+        const px = (ev.clientX - r.left) / r.width * 860;
+        const n = Math.round(ch.n0 + (px - 64) / (846 - 64) * (ch.n1 - ch.n0));
+        if (n >= ch.n0 && n <= ch.n1) this.setState(art === 'u' ? { uAuswahl: n } : { sAuswahl: n });
+      }
+    }, kinder);
+  }
+  szAendern(id, patch) {
+    this.setState(s => ({ szenarien: s.szenarien.map(x => x.id === id ? { ...x, ...patch } : x) }));
+  }
+  setModal(patch) { this.setState(s => ({ modal: { ...s.modal, ...patch } })); }
+
+  renderVals() {
+    const st = this.state;
+    const stand = st.stand;
+    const dls = stand.darlehen;
+    const fmt = v => this.fmt(v);
+    const heute = this.heuteYm();
+    const anschluss = parseFloat((stand.einstellungen || {}).anschlussZins) || 4.0;
+
+    const tabsDef = [['uebersicht', 'Übersicht'], ['kosten', 'Kosten'], ['finanzierung', 'Finanzierung'], ['simulation', 'Simulation'], ['verteilung', 'Verteilung'], ['einstellungen', 'Einstellungen']];
+    const tabs = tabsDef.map(t => ({
+      label: t[1],
+      fg: st.tab === t[0] ? 'var(--color-accent-700)' : 'var(--color-neutral-700)',
+      linie: st.tab === t[0] ? 'var(--color-accent)' : 'transparent',
+      go: () => this.setState({ tab: t[0] })
+    }));
+
+    const out = {
+      tabs,
+      syncKurz: st.sync.token && st.sync.gistId ? 'Sync aktiv' : (st.geladen ? 'lokal · kein Sync' : 'lade …'),
+      gesperrt: st.gesperrt,
+      frei: !st.gesperrt,
+      pinEingabe: st.pinEingabe, pinFehler: st.pinFehler,
+      setPinEingabe: ev => this.setState({ pinEingabe: ev.target.value }),
+      pinKeyDown: ev => { if (ev.key === 'Enter') this.entsperren(); },
+      entsperrenKlick: () => this.entsperren(),
+      tabUebersicht: st.tab === 'uebersicht', tabKosten: st.tab === 'kosten', tabFinanzierung: st.tab === 'finanzierung',
+      tabSimulation: st.tab === 'simulation', tabVerteilung: st.tab === 'verteilung', tabEinstellungen: st.tab === 'einstellungen',
+      standLabel: this.fmtYm(heute),
+      anschlussFmt: anschluss.toLocaleString('de-DE', { minimumFractionDigits: 1 }) + ' %',
+      monate: this.monVoll.map((m, i) => ({ v: i + 1, label: m })),
+      zeigeEinrichtung: (!!st.setupBlob && !st.sync.token) || !!st.standBlob,
+      standVerschluesseln: async () => {
+        const pass = (st.setupCodePass || '').trim();
+        if (pass.length < 8) { this.setState({ setupCodeInfo: 'Bitte mindestens 8 Zeichen.' }); return; }
+        const obj = this.standObjekt();
+        const inhalt = JSON.parse(await this.setupVerschluesseln(pass, obj));
+        inhalt.gespeichert = obj.gespeichert;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(inhalt, null, 1)], { type: 'application/json' }));
+        a.download = 'stand.json';
+        a.click();
+        this.setState({ setupCodeInfo: 'stand.json verschlüsselt — als data/stand.json ins Repo legen (ersetzt die Klartext-Datei).', setupCodePass: '' });
+      },
+      setupPass: st.setupPass, setupFehler: st.setupFehler,
+      setSetupPass: ev => this.setState({ setupPass: ev.target.value }),
+      setupKeyDown: ev => { if (ev.key === 'Enter') this.setupAnwenden(); },
+      setupKlick: () => this.setupAnwenden()
+    };
+
+    // ---------- Kosten ----------
+    const kosten = stand.kosten || [];
+    const kSum = kosten.reduce((a, k) => a + (+k.kosten || 0), 0);
+    const kBez = kosten.reduce((a, k) => a + (+k.bezahlt || 0), 0);
+    const kHw = kosten.reduce((a, k) => a + (+k.handwerker || 0), 0);
+    const katSet = [...new Set(kosten.map(k => k.kategorie).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'de'));
+    const gefiltert = st.fKat === 'Alle' ? kosten : kosten.filter(k => k.kategorie === st.fKat);
+    const fSum = gefiltert.reduce((a, k) => a + (+k.kosten || 0), 0);
+    const fBez = gefiltert.reduce((a, k) => a + (+k.bezahlt || 0), 0);
+    const fHw = gefiltert.reduce((a, k) => a + (+k.handwerker || 0), 0);
+    Object.assign(out, {
+      kategorien: ['Alle', ...katSet], kategorienRoh: katSet,
+      fKat: st.fKat, setFKat: ev => this.setState({ fKat: ev.target.value }),
+      kostenKennzahlen: [
+        { label: 'Gesamtkosten', wert: fmt(kSum) },
+        { label: 'Bezahlt', wert: fmt(kBez) },
+        { label: 'Offen', wert: fmt(kSum - kBez) },
+        { label: 'Handwerkeranteil', wert: fmt(kHw) }
+      ],
+      kostenAnzahl: gefiltert.length,
+      kSummeFmt: fmt(fSum), kBezahltFmt: fmt(fBez), kOffenFmt: fmt(fSum - fBez), kHandwerkerFmt: fmt(fHw),
+      kostenZeilen: gefiltert.map(k => {
+        const offen = (+k.kosten || 0) - (+k.bezahlt || 0);
+        return {
+          firma: k.firma, beschreibung: k.beschreibung || '', kategorie: k.kategorie || '—',
+          kostenFmt: this.fmt2(+k.kosten || 0), bezahltFmt: this.fmt2(+k.bezahlt || 0),
+          offenFmt: this.fmt2(offen), offenFarbe: Math.abs(offen) > 0.005 ? 'var(--color-accent-800)' : 'var(--color-neutral-500)',
+          handwerkerFmt: +k.handwerker ? this.fmt2(+k.handwerker) : '—',
+          onEdit: () => this.setState({ modal: { art: 'kosten', id: k.id, firma: k.firma, beschreibung: k.beschreibung || '', kategorie: k.kategorie || '', kosten: k.kosten, bezahlt: k.bezahlt, handwerker: k.handwerker || 0, fehler: null } })
+        };
+      }),
+      kostenNeu: () => this.setState({ modal: { art: 'kosten', id: null, firma: '', beschreibung: '', kategorie: '', kosten: '', bezahlt: '', handwerker: '', fehler: null } })
+    });
+
+    // ---------- Simulation & Darlehen ----------
+    if (dls) {
+      const basisM = this.sim('mammendorf', null, anschluss);
+      const basisW = this.sim('weinberg', null, anschluss);
+      const sonderSum = k => Object.values((k === 'mammendorf' ? basisM : basisW).sonderIst).reduce((a, b) => a + b, 0);
+      out.darlehenKarten = [['mammendorf', basisM], ['weinberg', basisW]].map(([key, s]) => {
+        const rest = this.saldoBei(s, heute);
+        const pct = Math.round((s.dl.betrag - rest) / s.dl.betrag * 1000) / 10;
+        return {
+          konto: s.dl.konto, name: s.dl.name, objekt: s.dl.objekt, bindung: '30.12.' + s.dl.bindungJahr,
+          restFmt: fmt(rest), betragFmt: fmt(s.dl.betrag), getilgtFmt: fmt(s.dl.betrag - rest), pct,
+          zahler: s.dl.zahler, rateFmt: this.fmt2(+s.dl.rate),
+          zinsFmt: (+s.dl.zins).toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' %',
+          sonderFmt: fmt(sonderSum(key)), restBindFmt: fmt(s.restBind)
+        };
+      });
+      const ekSum = (stand.verteilung || []).filter(v => v.typ === 'EK').reduce((a, v) => a + (+v.betrag || 0), 0);
+      out.kennzahlen = [
+        { label: 'Projektkosten', wert: fmt(kSum), sub: fmt(kSum - kBez) + ' davon offen' },
+        { label: 'Restschuld gesamt', wert: fmt(this.saldoBei(basisM, heute) + this.saldoBei(basisW, heute)), sub: 'von ' + fmt(basisM.dl.betrag + basisW.dl.betrag) + ' Darlehen' },
+        { label: 'Eigenkapital', wert: fmt(ekSum), sub: 'gemeinsam eingebracht' },
+        { label: 'Sondertilgungen', wert: fmt(sonderSum('mammendorf') + sonderSum('weinberg')), sub: 'bisher geleistet' }
+      ];
+      const uCh = this.chart([
+        { name: 'Gesamt', farbe: 'var(--color-neutral-800)', punkte: this.kombiPunkte(basisM, basisW), dash: 'none' },
+        { name: basisM.dl.name, farbe: 'var(--color-accent)', punkte: basisM.punkte },
+        { name: basisW.dl.name, farbe: 'var(--color-neutral-500)', punkte: basisW.punkte, dash: '5 4' }
+      ], basisM.bind, st.uAuswahl);
+      out.uChart = uCh;
+      out.uChartSvg = this.chartSvg(uCh, 'u');
+      out.uHatAuswahl = !!uCh.auswahl;
+      out.uKeineAuswahl = !uCh.auswahl;
+      out.uAuswahlDatum = uCh.auswahl ? this.fmtYm(uCh.auswahl.n) : '';
+      out.uAuswahlWerte = uCh.auswahl ? uCh.auswahl.punkte.map(p => ({ name: p.name, farbe: p.farbe, wert: this.fmt2(p.wert) })) : [];
+      const warnIst = this.kontingentWarnungen(null, '');
+      out.warnungenIst = warnIst;
+      out.hatWarnungen = warnIst.length > 0;
+
+      // Finanzierung: Jahres-Tabellen
+      out.finBloecke = [basisM, basisW].map(s => ({
+        name: s.dl.name, konto: s.dl.konto, betragFmt: fmt(s.dl.betrag),
+        zinsFmt: (+s.dl.zins).toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' %', rateFmt: this.fmt2(+s.dl.rate),
+        jahre: Object.keys(s.jahre).map(Number).sort((a, b) => a - b).filter(j => j <= s.dl.bindungJahr).map(j => ({
+          jahr: j, zinsenFmt: fmt(s.jahre[j].zins), tilgungFmt: fmt(s.jahre[j].tilg),
+          sonderFmt: s.jahre[j].sonder ? fmt(s.jahre[j].sonder) : '—', restFmt: fmt(s.jahre[j].rest),
+          bg: j === this.numYm(heute).j ? 'color-mix(in srgb, var(--color-accent) 7%, transparent)' : 'transparent'
+        }))
+      }));
+
+      // Szenarien
+      const farben = ['var(--color-neutral-500)', 'var(--color-accent-800)', 'var(--color-neutral-800)', 'var(--color-accent-300)'];
+      const basisKombi = this.kombiPunkte(basisM, basisW);
+      const basisZ = basisM.zinsen + basisW.zinsen;
+      const basisEnde = Math.max(basisM.ende || 0, basisW.ende || 0);
+      const szErg = st.szenarien.map((sz, i) => {
+        const extra = this.szenarioExtra(sz);
+        const m = this.sim('mammendorf', extra, anschluss);
+        const w = this.sim('weinberg', extra, anschluss);
+        return { sz, extra, m, w, farbe: farben[i % farben.length], kombi: this.kombiPunkte(m, w) };
+      });
+      let n1 = basisM.bind;
+      if (st.horizont === 'ende') {
+        n1 = basisEnde || basisM.bind;
+        szErg.forEach(e => { const en = Math.max(e.m.ende || 0, e.w.ende || 0); if (en > n1) n1 = en; });
+        n1 = Math.min(n1 + 6, this.ymNum(2078, 1));
+      }
+      out.anschlussZins = anschluss;
+      out.setAnschluss = ev => this.setStand({ einstellungen: { ...stand.einstellungen, anschlussZins: parseFloat(ev.target.value) || 0 } });
+      out.horizontOpts = [
+        { label: 'Bis Zinsbindung 2033', aktiv: st.horizont === 'bindung', go: () => this.setState({ horizont: 'bindung' }) },
+        { label: 'Bis Volltilgung', aktiv: st.horizont === 'ende', go: () => this.setState({ horizont: 'ende' }) }
+      ];
+      out.szKarten = szErg.map(e => ({
+        name: e.sz.name, farbe: e.farbe,
+        einmalBetrag: e.sz.einmalBetrag, einmalYm: e.sz.einmalYm, einmalDl: e.sz.einmalDl,
+        jBetrag: e.sz.jBetrag, jMonat: e.sz.jMonat, jDl: e.sz.jDl,
+        setName: ev => this.szAendern(e.sz.id, { name: ev.target.value }),
+        setEinmalBetrag: ev => this.szAendern(e.sz.id, { einmalBetrag: ev.target.value }),
+        setEinmalYm: ev => this.szAendern(e.sz.id, { einmalYm: ev.target.value }),
+        setEinmalDl: ev => this.szAendern(e.sz.id, { einmalDl: ev.target.value }),
+        setJBetrag: ev => this.szAendern(e.sz.id, { jBetrag: ev.target.value }),
+        setJMonat: ev => this.szAendern(e.sz.id, { jMonat: +ev.target.value }),
+        setJDl: ev => this.szAendern(e.sz.id, { jDl: ev.target.value }),
+        entfernen: () => this.setState(s => ({ szenarien: s.szenarien.filter(x => x.id !== e.sz.id) })),
+        warnung: this.kontingentWarnungen(e.extra, '').filter(w => this.kontingentWarnungen(null, '').indexOf(w) < 0).join(' ') || (parseFloat(e.sz.einmalBetrag) > 0 && parseFloat(e.sz.einmalBetrag) < 1000 ? 'Mindestbetrag je Sondertilgung laut Vertrag: 1.000 €.' : null)
+      }));
+      out.szHinzu = () => this.setState(s => ({ szenarien: [...s.szenarien, { id: 's' + Date.now(), name: 'Szenario ' + (s.szenarien.length + 1), einmalBetrag: '', einmalYm: '2026-12', einmalDl: 'mammendorf', jBetrag: '', jMonat: 12, jDl: 'mammendorf' }] }));
+      const sCh = this.chart([
+        { name: 'Basis (tatsächlicher Kurs)', farbe: 'var(--color-accent)', punkte: basisKombi },
+        ...szErg.map(e => ({ name: e.sz.name, farbe: e.farbe, punkte: e.kombi }))
+      ], n1, st.sAuswahl);
+      out.sChart = sCh;
+      out.sChartSvg = this.chartSvg(sCh, 's');
+      out.sHatAuswahl = !!sCh.auswahl;
+      out.sKeineAuswahl = !sCh.auswahl;
+      out.sAuswahlDatum = sCh.auswahl ? this.fmtYm(sCh.auswahl.n) : '';
+      out.sAuswahlWerte = sCh.auswahl ? sCh.auswahl.punkte.map(p => ({ name: p.name, farbe: p.farbe, wert: this.fmt2(p.wert) })) : [];
+      const endeLabel = n => n ? this.fmtYm(n) : 'über 2088 hinaus';
+      const diffLabel = d => d > 0 ? '−' + (Math.floor(d / 12) ? Math.floor(d / 12) + ' J ' : '') + (d % 12) + ' M' : '±0';
+      out.szMetriken = [
+        { name: 'Basis (tatsächlicher Kurs)', farbe: 'var(--color-accent)', restBind: fmt(basisM.restBind + basisW.restBind), endeM: 'M ' + endeLabel(basisM.ende), endeW: 'W ' + endeLabel(basisW.ende), zinsen: fmt(basisZ), ersparnis: '—', kuerzerM: '—', kuerzerW: '' },
+        ...szErg.map(e => {
+          const z = e.m.zinsen + e.w.zinsen;
+          const dM = basisM.ende && e.m.ende ? basisM.ende - e.m.ende : 0;
+          const dW = basisW.ende && e.w.ende ? basisW.ende - e.w.ende : 0;
+          return {
+            name: e.sz.name, farbe: e.farbe,
+            restBind: fmt(e.m.restBind + e.w.restBind),
+            endeM: 'M ' + endeLabel(e.m.ende), endeW: 'W ' + endeLabel(e.w.ende),
+            zinsen: fmt(z), ersparnis: fmt(basisZ - z),
+            kuerzerM: 'M ' + diffLabel(dM), kuerzerW: 'W ' + diffLabel(dW)
+          };
+        })
+      ];
+
+      // Verteilung
+      const vert = stand.verteilung || [];
+      const monateSeitStart = Math.max(0, heute - this.ymNum(2024, 10) + 1);
+      out.personKarten = ['Johannes', 'Christina'].map(name => {
+        const dlKey = Object.keys(dls).find(k => dls[k].zahler === name);
+        const dl = dlKey ? dls[dlKey] : null;
+        const ek = vert.filter(v => v.person === name && v.typ === 'EK').reduce((a, v) => a + (+v.betrag || 0), 0);
+        const so = vert.filter(v => v.person === name && v.typ === 'Sondertilgung').reduce((a, v) => a + (+v.betrag || 0), 0);
+        const raten = dl ? monateSeitStart * (+dl.rate) : 0;
+        return {
+          name, rolle: dl ? 'zahlt Rate ' + dl.name : '',
+          ekFmt: fmt(ek), sonderFmt: fmt(so),
+          rateInfo: dl ? monateSeitStart + ' × ' + this.fmt2(+dl.rate) : '—',
+          ratenFmt: fmt(raten), gesamtFmt: fmt(ek + so + raten),
+          gesamt: ek + so + raten
+        };
+      });
+      const pj = out.personKarten[0].gesamt, pc = out.personKarten[1].gesamt;
+      out.saldoText = Math.abs(pj - pc) < 1
+        ? 'Beide haben exakt gleich viel eingebracht.'
+        : (pj > pc ? 'Johannes' : 'Christina') + ' hat bisher ' + fmt(Math.abs(pj - pc)) + ' mehr eingebracht als ' + (pj > pc ? 'Christina' : 'Johannes') + '.';
+      out.verteilungZeilen = [...vert].sort((a, b) => this.ymNum(+b.jahr, +b.monat) - this.ymNum(+a.jahr, +a.monat)).map(v => ({
+        monatFmt: this.monNamen[(+v.monat || 1) - 1] + ' ' + v.jahr,
+        typLabel: v.typ === 'EK' ? 'Eigenkapital' : 'Sondertilgung',
+        tagKlasse: v.typ === 'EK' ? 'tag-neutral' : 'tag-accent',
+        person: v.person, notiz: (v.notiz || '') + (v.typ === 'Sondertilgung' && v.darlehen ? (v.notiz ? ' · ' : '') + dls[v.darlehen].name : ''),
+        betragFmt: this.fmt2(+v.betrag || 0),
+        onEdit: () => this.setState({ modal: { art: 'verteilung', id: v.id, typ: v.typ, person: v.person, jahr: v.jahr, monat: v.monat, betrag: v.betrag, darlehen: v.darlehen || 'mammendorf', notiz: v.notiz || '', fehler: null } })
+      }));
+      out.verteilungNeu = () => {
+        const d = new Date();
+        this.setState({ modal: { art: 'verteilung', id: null, typ: 'EK', person: 'Johannes', jahr: d.getFullYear(), monat: d.getMonth() + 1, betrag: '', darlehen: 'mammendorf', notiz: '', fehler: null } });
+      };
+
+      // Einstellungen — Darlehen
+      out.sDarlehen = Object.keys(dls).map(key => ({
+        name: dls[key].name, konto: dls[key].konto, betragFmt: fmt(dls[key].betrag), zahler: dls[key].zahler,
+        zins: dls[key].zins, rate: dls[key].rate,
+        setZins: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], zins: parseFloat(ev.target.value) || 0 } } }),
+        setRate: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], rate: parseFloat(ev.target.value) || 0 } } }),
+        istYm: dls[key].istJahr ? dls[key].istJahr + '-' + String(dls[key].istMonat).padStart(2, '0') : '',
+        istRest: dls[key].istRest || '',
+        setIstYm: ev => { const t = (ev.target.value || '').split('-'); this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], istJahr: +t[0] || null, istMonat: +t[1] || null } } }); },
+        setIstRest: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], istRest: parseFloat(ev.target.value) || 0 } } })
+      }));
+    } else {
+      Object.assign(out, { darlehenKarten: [], kennzahlen: [], uChart: { grid: [], xticks: [], linien: [] }, uChartSvg: null, uHatAuswahl: false, uKeineAuswahl: false, uAuswahlDatum: '', uAuswahlWerte: [], finBloecke: [], szKarten: [], sChart: { grid: [], xticks: [], linien: [] }, sChartSvg: null, sHatAuswahl: false, sKeineAuswahl: false, sAuswahlDatum: '', sAuswahlWerte: [], szMetriken: [], personKarten: [], verteilungZeilen: [], sDarlehen: [], horizontOpts: [], anschlussZins: 4, warnungenIst: [], hatWarnungen: false, saldoText: '', verteilungNeu: () => {}, szHinzu: () => {}, setAnschluss: () => {} });
+    }
+
+    // ---------- Einstellungen: Sync, Setup, PIN ----------
+    Object.assign(out, {
+      syncToken: st.sync.token || '', syncGist: st.sync.gistId || '',
+      setSyncToken: ev => this.speichereSync({ ...st.sync, token: ev.target.value.trim() }),
+      setSyncGist: ev => this.speichereSync({ ...st.sync, gistId: ev.target.value.trim() }),
+      syncHoch: () => this.syncUpload(false),
+      syncRunter: () => this.syncLoad(false),
+      standRunter: () => this.standHerunterladen(),
+      syncStatus: st.syncStatus,
+      setupCodePass: st.setupCodePass, setupCodeInfo: st.setupCodeInfo,
+      setSetupCodePass: ev => this.setState({ setupCodePass: ev.target.value }),
+      setupErzeugen: async () => {
+        const pass = (st.setupCodePass || '').trim();
+        if (pass.length < 8) { this.setState({ setupCodeInfo: 'Bitte mindestens 8 Zeichen.' }); return; }
+        if (!st.sync.token || !st.sync.gistId) { this.setState({ setupCodeInfo: 'Erst Token und Gist-ID hinterlegen (und einmal hochladen).' }); return; }
+        const inhalt = await this.setupVerschluesseln(pass, { token: st.sync.token, gistId: st.sync.gistId });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([inhalt], { type: 'application/json' }));
+        a.download = 'setup.json';
+        a.click();
+        this.setState({ setupCodeInfo: 'setup.json erzeugt — neben die Website ins Repo legen.', setupCodePass: '' });
+      },
+      pinNeu: st.pinNeu, pinInfo: st.pinInfo,
+      pinPlatzhalter: (stand.einstellungen || {}).sperreHash ? 'Neue PIN (leer = Sperre aus)' : 'PIN festlegen (min. 8 Zeichen)',
+      setPinNeu: ev => this.setState({ pinNeu: ev.target.value }),
+      pinSpeichern: async () => {
+        const p = (st.pinNeu || '').trim();
+        if (!p) {
+          sessionStorage.removeItem('anwesen.entsperrt');
+          sessionStorage.removeItem('anwesen.schluessel');
+          this._pinKey = null; this._pinSalt = null;
+          await this.syncPersistieren(this.state.sync);
+          const einst = { ...stand.einstellungen }; delete einst.sperreHash;
+          this.setStand({ einstellungen: einst });
+          this.setState({ pinNeu: '', pinInfo: 'Sperre entfernt — Token und Datenstand liegen wieder unverschlüsselt.' });
+          return;
+        }
+        if (p.length < 8) { this.setState({ pinInfo: 'Bitte mindestens 8 Zeichen — die PIN verschlüsselt auch das GitHub-Token.' }); return; }
+        const hash = await this.pinHash(p);
+        sessionStorage.setItem('anwesen.entsperrt', '1');
+        try { await this.datenKeyErmitteln(null); } catch (e) {}
+        const salt = this.b64(crypto.getRandomValues(new Uint8Array(16)));
+        const k = await this.schluesselAusPin(p, salt);
+        this._pinKey = k.key; this._pinSalt = salt; this._pin = p;
+        sessionStorage.setItem('anwesen.schluessel', k.raw);
+        await this.syncPersistieren(this.state.sync);
+        const dkRaw = sessionStorage.getItem('anwesen.datenschluessel');
+        if (dkRaw) {
+          const salt2 = this.b64(crypto.getRandomValues(new Uint8Array(16)));
+          const k2 = await this.schluesselAusPin(p, salt2);
+          const iv2 = crypto.getRandomValues(new Uint8Array(12));
+          const ct2 = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv2 }, k2.key, this.b64ab(dkRaw));
+          localStorage.setItem('anwesen.tresor.v1', JSON.stringify({ salt: salt2, iv: this.b64(iv2), key: this.b64(new Uint8Array(ct2)) }));
+        }
+        this.setStand({ einstellungen: { ...stand.einstellungen, sperreHash: hash } });
+        this.setState({ pinNeu: '', pinInfo: 'Sperre aktiv — gilt über den Sync auf allen Geräten ab dem nächsten Öffnen.' });
+      }
+    });
+
+    // ---------- Modal ----------
+    const m = st.modal;
+    if (m) {
+      const mv = {
+        titel: m.art === 'kosten' ? (m.id ? 'Kosten-Eintrag bearbeiten' : 'Neuer Kosten-Eintrag') : (m.id ? 'Eintrag bearbeiten' : 'Neuer Eintrag'),
+        istKosten: m.art === 'kosten', istVerteilung: m.art === 'verteilung',
+        istSonder: m.typ === 'Sondertilgung',
+        kannLoeschen: !!m.id, fehler: m.fehler,
+        firma: m.firma, beschreibung: m.beschreibung, kategorie: m.kategorie, kosten: m.kosten, bezahlt: m.bezahlt, handwerker: m.handwerker,
+        typ: m.typ, person: m.person, jahr: m.jahr, monat: m.monat, betrag: m.betrag, darlehen: m.darlehen, notiz: m.notiz,
+        setFirma: ev => this.setModal({ firma: ev.target.value }),
+        setBeschreibung: ev => this.setModal({ beschreibung: ev.target.value }),
+        setKategorie: ev => this.setModal({ kategorie: ev.target.value }),
+        setKosten: ev => this.setModal({ kosten: ev.target.value }),
+        setBezahlt: ev => this.setModal({ bezahlt: ev.target.value }),
+        setHandwerker: ev => this.setModal({ handwerker: ev.target.value }),
+        setTyp: ev => this.setModal({ typ: ev.target.value }),
+        setPerson: ev => this.setModal({ person: ev.target.value }),
+        setJahr: ev => this.setModal({ jahr: ev.target.value }),
+        setMonat: ev => this.setModal({ monat: +ev.target.value }),
+        setBetrag: ev => this.setModal({ betrag: ev.target.value }),
+        setDarlehen: ev => this.setModal({ darlehen: ev.target.value }),
+        setNotiz: ev => this.setModal({ notiz: ev.target.value }),
+        loeschen: () => {
+          if (m.art === 'kosten') this.setStand({ kosten: stand.kosten.filter(k => k.id !== m.id) });
+          else this.setStand({ verteilung: stand.verteilung.filter(v => v.id !== m.id) });
+          this.setState({ modal: null });
+        },
+        speichern: () => {
+          if (m.art === 'kosten') {
+            if (!(m.firma || '').trim() || m.kosten === '' || isNaN(+m.kosten)) { this.setModal({ fehler: 'Firma und Kosten sind Pflichtfelder.' }); return; }
+            const e = { id: m.id || 'k' + Date.now(), firma: m.firma.trim(), beschreibung: (m.beschreibung || '').trim(), kategorie: (m.kategorie || '').trim() || 'Sonstiges', kosten: +m.kosten, bezahlt: +m.bezahlt || 0, handwerker: +m.handwerker || 0 };
+            this.setStand({ kosten: m.id ? stand.kosten.map(k => k.id === m.id ? e : k) : [...stand.kosten, e] });
+          } else {
+            if (m.betrag === '' || isNaN(+m.betrag) || !(+m.jahr >= 2020)) { this.setModal({ fehler: 'Bitte Jahr und Betrag prüfen.' }); return; }
+            const e = { id: m.id || 'v' + Date.now(), jahr: +m.jahr, monat: +m.monat, typ: m.typ, person: m.person, betrag: +m.betrag, notiz: (m.notiz || '').trim() };
+            if (m.typ === 'Sondertilgung') e.darlehen = m.darlehen;
+            this.setStand({ verteilung: m.id ? stand.verteilung.map(v => v.id === m.id ? e : v) : [...stand.verteilung, e] });
+          }
+          this.setState({ modal: null });
+        }
+      };
+      out.mv = mv;
+    } else {
+      out.mv = null;
+    }
+    out.modalZu = () => this.setState({ modal: null });
+    out.stopp = ev => ev.stopPropagation();
+    return out;
+  }
+}
+</script>
+</body>
+</html>
