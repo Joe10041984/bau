@@ -68,10 +68,23 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
             <button class="btn btn-primary btn-block" onClick="{{ setupKlick }}">Entsperren</button>
           </div>
         </sc-if>
-        <label class="btn btn-ghost btn-block" style="cursor:pointer;">Datenstand-Datei öffnen<input type="file" accept=".json,application/json" onChange="{{ dateiImport }}" style="display:none;"></label>
-        <sc-if value="{{ importFehler }}" hint-placeholder-val="{{ false }}">
-          <div style="font-size:12.5px; color:var(--color-accent-800); text-align:center;">{{ importFehler }}</div>
-        </sc-if>
+        <div style="border-top:1px solid var(--color-divider); padding-top:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600);">Erstes Gerät</div>
+          <p style="margin:0; font-size:12.5px; color:var(--color-neutral-700); text-wrap:pretty;">Exportierten Datenstand öffnen. Danach unter „Einstellungen“ PIN setzen und den Sync aktivieren.</p>
+          <label class="btn btn-secondary btn-block" style="cursor:pointer;">Datenstand-Datei öffnen<input type="file" accept=".json,application/json" onChange="{{ dateiImport }}" style="display:none;"></label>
+          <sc-if value="{{ importFehler }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px; color:var(--color-accent-800); text-align:center;">{{ importFehler }}</div>
+          </sc-if>
+        </div>
+        <div style="border-top:1px solid var(--color-divider); padding-top:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600);">Mit bestehendem Gist verbinden</div>
+          <div class="field"><label>GitHub-Token</label><input type="password" class="input" value="{{ syncToken }}" onChange="{{ setSyncToken }}" placeholder="github_pat_…"></div>
+          <div class="field"><label>Gist-ID</label><input class="input" value="{{ syncGist }}" onChange="{{ setSyncGist }}"></div>
+          <button class="btn btn-secondary btn-block" onClick="{{ syncRunter }}">Verbinden & laden</button>
+          <sc-if value="{{ syncStatus }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px; color:var(--color-neutral-700); text-align:center;">{{ syncStatus }}</div>
+          </sc-if>
+        </div>
       </div>
     </sc-if>
 
@@ -773,6 +786,7 @@ class Component extends DCLogic {
   async syncUpload(auto) {
     const c = this.state.sync;
     if (!c.token) { if (!auto) this.setState({ syncStatus: 'Bitte zuerst ein GitHub-Token eintragen.' }); return; }
+    if (!(this.state.stand && this.state.stand.darlehen)) return; // nie einen leeren Stand hochladen
     try {
       if (!auto) this.setState({ syncStatus: 'Lade hoch …' });
       const stand = this.standObjekt();
@@ -829,7 +843,8 @@ class Component extends DCLogic {
       if (auto) {
         if (remoteTs && remoteTs <= (localStorage.getItem('anwesen.sync.ts') || '')) return;
         const lokalTs = localStorage.getItem('anwesen.stand.ts') || '';
-        if (lokalTs && remoteTs && remoteTs < lokalTs) { this.syncUpload(true); return; }
+        const lokalHatDaten = !!(this.state.stand && this.state.stand.darlehen);
+        if (lokalHatDaten && lokalTs && remoteTs && remoteTs < lokalTs) { this.syncUpload(true); return; }
       }
       const einst = s.einstellungen || {};
       const sperren = !!einst.sperreHash && sessionStorage.getItem('anwesen.entsperrt') !== '1';
