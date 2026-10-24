@@ -2,6 +2,9 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com https://gist.githubusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
 </head>
@@ -10,6 +13,8 @@
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Anwesen</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
 <link rel="stylesheet" href="styles.css">
 <script src="ds-bundle.js"></script>
 <style>
@@ -28,7 +33,12 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
           <div style="font-family:var(--font-heading); font-weight:var(--font-heading-weight); font-size:32px; line-height:1;">Anwesen</div>
           <div style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--color-neutral-600);">{{ kopfAdresse }}</div>
         </div>
-        <div style="font-size:12px; color:var(--color-neutral-600); font-variant-numeric:tabular-nums;">{{ syncKurz }}</div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="font-size:12px; color:var(--color-neutral-600); font-variant-numeric:tabular-nums;">{{ syncKurz }}</div>
+          <sc-if value="{{ zeigeSperren }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-ghost" style="padding:4px 10px; font-size:12px;" onClick="{{ sperrenKlick }}">Sperren</button>
+          </sc-if>
+        </div>
       </div>
       <sc-if value="{{ frei }}" hint-placeholder-val="{{ false }}">
       <nav style="display:flex; gap:26px; margin-top:18px; overflow-x:auto;">
@@ -51,7 +61,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
         <sc-if value="{{ pinFehler }}" hint-placeholder-val="{{ false }}">
           <div style="font-size:12.5px; color:var(--color-accent-800);">{{ pinFehler }}</div>
         </sc-if>
-        <button class="btn btn-primary btn-block" onClick="{{ entsperrenKlick }}">Entsperren</button>
+        <button class="btn btn-primary btn-block" onClick="{{ entsperrenKlick }}">{{ entsperrenLabel }}</button>
       </div>
     </sc-if>
 
@@ -121,7 +131,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
             <div class="card">
               <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
                 <div class="card-kicker">Darlehen {{ d.konto }}</div>
-                <span class="tag tag-neutral">Zinsbindung bis {{ d.bindung }}</span>
+                <span class="tag tag-neutral" style="white-space:nowrap;">Zinsbindung bis {{ d.bindung }}</span>
               </div>
               <div class="card-title" style="font-size:20px;">{{ d.name }} <span style="color:var(--color-neutral-600); font-size:14px; font-family:var(--font-body);">{{ d.objekt }}</span></div>
               <div style="font-family:var(--font-heading); font-size:38px; line-height:1.05; font-variant-numeric:tabular-nums;">{{ d.restFmt }}</div>
@@ -133,10 +143,10 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
               <div style="font-size:12px; color:var(--color-neutral-600);">Tilgung bisher: {{ d.getilgtFmt }} von {{ d.betragFmt }} ({{ d.pct }} %)</div>
               <div class="hr" style="margin:8px 0 4px 0;"></div>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; font-size:13px;">
-                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Rate ({{ d.zahler }})</span><span style="font-variant-numeric:tabular-nums;">{{ d.rateFmt }}</span></div>
-                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Sollzins</span><span style="font-variant-numeric:tabular-nums;">{{ d.zinsFmt }}</span></div>
-                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Sondertilgungen</span><span style="font-variant-numeric:tabular-nums;">{{ d.sonderFmt }}</span></div>
-                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Rest Ende Zinsbindung</span><span style="font-variant-numeric:tabular-nums;">{{ d.restBindFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">{{ d.rateLabel }}</span><span style="font-variant-numeric:tabular-nums; white-space:nowrap;">{{ d.rateFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Sollzins</span><span style="font-variant-numeric:tabular-nums; white-space:nowrap;">{{ d.zinsFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Sondertilgungen</span><span style="font-variant-numeric:tabular-nums; white-space:nowrap;">{{ d.sonderFmt }}</span></div>
+                <div style="display:flex; justify-content:space-between;"><span style="color:var(--color-neutral-600);">Rest Ende Zinsbindung</span><span style="font-variant-numeric:tabular-nums; white-space:nowrap;">{{ d.restBindFmt }}</span></div>
               </div>
             </div>
           </sc-for>
@@ -154,7 +164,14 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
 
         <div class="card">
           <div class="card-kicker">Tilgungsverlauf</div>
-          <div class="card-title">Restschuld bis zum Ende der Zinsbindung</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+            <div class="card-title">{{ uTitel }}</div>
+            <div class="seg">
+              <sc-for list="{{ uHorizontOpts }}" as="h" hint-placeholder-count="2">
+                <label class="seg-opt"><input type="radio" name="uHorizont" checked="{{ h.aktiv }}" onChange="{{ h.go }}">{{ h.label }}</label>
+              </sc-for>
+            </div>
+          </div>
           {{ uChartSvg }}
           <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--color-neutral-700);">
             <sc-for list="{{ uChart.linien }}" as="l" hint-placeholder-count="3">
@@ -180,7 +197,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
     <sc-if value="{{ tabKosten }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Kosten" style="display:flex; flex-direction:column; gap:22px; animation:fadeUp .25s ease;">
         <div style="display:flex; align-items:end; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-          <div style="display:grid; grid-template-columns:repeat(4,minmax(140px,auto)); gap:28px;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,auto)); gap:28px; flex:1; min-width:0;">
             <sc-for list="{{ kostenKennzahlen }}" as="k" hint-placeholder-count="4">
               <div style="border-top:2px solid var(--color-accent); padding-top:8px;">
                 <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600);">{{ k.label }}</div>
@@ -197,7 +214,59 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
             <button class="btn btn-primary" onClick="{{ kostenNeu }}">Eintrag hinzufügen</button>
           </div>
         </div>
-        <table class="table">
+        <div class="card">
+          <div class="card-kicker">Kosten nach Kategorie</div>
+          <div style="display:flex; gap:36px; align-items:center; flex-wrap:wrap;">
+            <div style="position:relative; width:200px; height:200px; flex:none;">
+              <svg viewBox="0 0 200 200" width="200" height="200" style="display:block;">
+                <circle cx="100" cy="100" r="70" fill="none" style="stroke:var(--color-divider); stroke-width:1;"></circle>
+                <g transform="rotate(-90 100 100)">
+                  <sc-for list="{{ katSegmente }}" as="s" hint-placeholder-count="0">
+                    <circle cx="100" cy="100" r="70" fill="none" onClick="{{ s.go }}" style="stroke:{{ s.farbe }}; stroke-width:{{ s.breite }}; stroke-dasharray:{{ s.dash }}; stroke-dashoffset:{{ s.offset }}; cursor:pointer; transition:stroke-width .15s;"><title>{{ s.titel }}</title></circle>
+                  </sc-for>
+                  <sc-if value="{{ katHatRest }}" hint-placeholder-val="{{ false }}">
+                    <circle cx="100" cy="100" r="70" fill="none" onMouseEnter="{{ katRestEnter }}" onMouseLeave="{{ katRestLeave }}" style="stroke:var(--color-neutral-200); stroke-width:{{ katRestSeg.breite }}; stroke-dasharray:{{ katRestSeg.dash }}; stroke-dashoffset:{{ katRestSeg.offset }}; transition:stroke-width .15s;"><title>{{ katRestSeg.titel }}</title></circle>
+                  </sc-if>
+                </g>
+              </svg>
+              <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none;">
+                <div style="font-family:var(--font-heading); font-size:20px; font-variant-numeric:tabular-nums;">{{ katMitteWert }}</div>
+                <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600);">{{ katMitteLabel }}</div>
+              </div>
+            </div>
+            <div style="flex:1; min-width:260px; display:flex; flex-direction:column;">
+              <sc-for list="{{ katSegmente }}" as="s" hint-placeholder-count="5">
+                <button onClick="{{ s.go }}" style="display:grid; grid-template-columns:12px minmax(0,1fr) auto 48px; gap:12px; align-items:center; padding:7px 4px; background:{{ s.bg }}; border:none; border-bottom:1px solid var(--color-divider); font:inherit; font-size:13.5px; color:var(--color-text); text-align:left; cursor:pointer;" style-hover="background:var(--color-neutral-100);">
+                  <span style="width:10px; height:10px; border:2px solid {{ s.farbe }}; border-radius:50%;"></span>
+                  <span>{{ s.name }}</span>
+                  <span style="font-variant-numeric:tabular-nums;">{{ s.wertFmt }}</span>
+                  <span style="font-variant-numeric:tabular-nums; text-align:right; color:var(--color-neutral-600);">{{ s.pctFmt }}</span>
+                </button>
+              </sc-for>
+              <sc-if value="{{ katHatRest }}" hint-placeholder-val="{{ false }}">
+                <div onMouseEnter="{{ katRestEnter }}" onMouseLeave="{{ katRestLeave }}" style="display:flex; flex-direction:column;">
+                  <div style="display:grid; grid-template-columns:12px minmax(0,1fr) auto 48px; gap:12px; align-items:center; padding:7px 4px; background:{{ katRestZeile.bg }}; border-bottom:1px solid var(--color-divider); font-size:13.5px; cursor:default;">
+                    <span style="width:10px; height:10px; border:2px solid var(--color-neutral-300); border-radius:50%;"></span>
+                    <span style="font-style:italic;">{{ katRestZeile.name }}</span>
+                    <span style="font-variant-numeric:tabular-nums;">{{ katRestZeile.wertFmt }}</span>
+                    <span style="font-variant-numeric:tabular-nums; text-align:right; color:var(--color-neutral-600);">{{ katRestZeile.pctFmt }}</span>
+                  </div>
+                  <sc-if value="{{ katRestOffen }}" hint-placeholder-val="{{ false }}">
+                    <sc-for list="{{ katRestZeilen }}" as="r" hint-placeholder-count="0">
+                      <button onClick="{{ r.go }}" style="display:grid; grid-template-columns:12px minmax(0,1fr) auto 48px; gap:12px; align-items:center; padding:5px 4px 5px 28px; background:{{ r.bg }}; border:none; border-bottom:1px dashed var(--color-divider); font:inherit; font-size:12.5px; color:var(--color-neutral-700); text-align:left; cursor:pointer;" style-hover="background:var(--color-neutral-100);">
+                        <span></span>
+                        <span>{{ r.name }}</span>
+                        <span style="font-variant-numeric:tabular-nums;">{{ r.wertFmt }}</span>
+                        <span style="font-variant-numeric:tabular-nums; text-align:right; color:var(--color-neutral-600);">{{ r.pctFmt }}</span>
+                      </button>
+                    </sc-for>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;"><table class="table">
           <thead>
             <tr>
               <th>Firma</th><th>Beschreibung</th><th>Kategorie</th>
@@ -227,7 +296,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
               <td style="text-align:right; font-variant-numeric:tabular-nums; border-bottom:none;">{{ kHandwerkerFmt }}</td>
             </tr>
           </tfoot>
-        </table>
+        </table></div>
       </div>
     </sc-if>
 
@@ -241,7 +310,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
               <div style="font-family:var(--font-heading); font-size:22px;">{{ f.name }}</div>
               <div style="font-size:12.5px; color:var(--color-neutral-600);">Konto {{ f.konto }} · {{ f.betragFmt }} · {{ f.zinsFmt }} Sollzins · Rate {{ f.rateFmt }}</div>
             </div>
-            <table class="table">
+            <div style="overflow-x:auto;"><table class="table">
               <thead>
                 <tr>
                   <th>Jahr</th><th style="text-align:right;">Zinsen</th><th style="text-align:right;">Tilgung</th>
@@ -259,7 +328,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
                   </tr>
                 </sc-for>
               </tbody>
-            </table>
+            </table></div>
             <div style="font-size:12px; color:var(--color-neutral-600);">Ab {{ standLabel }} Prognose; nach Zinsbindung mit {{ anschlussFmt }} Anschlusszins gerechnet.</div>
           </div>
         </sc-for>
@@ -273,7 +342,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
           <p style="max-width:62ch; margin:0; font-size:13.5px; color:var(--color-neutral-700); text-wrap:pretty;">Jedes Szenario legt Sonderzahlungen auf den tatsächlichen Verlauf — einmalig, jährlich wiederkehrend oder beides. Das 5 %-Jahreskontingent ({{ kontingentText }}) wird überwacht.</p>
           <div style="display:flex; gap:14px; align-items:end; flex-wrap:wrap;">
             <div class="field" style="width:150px;">
-              <label>Anschlusszins ab 2034 (%)</label>
+              <label>Anschlusszins ab {{ anschlussAbJahr }} (%)</label>
               <input type="number" step="0.1" min="0" class="input" value="{{ anschlussZins }}" onChange="{{ setAnschluss }}">
             </div>
             <div class="seg">
@@ -348,7 +417,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
           </sc-if>
         </div>
 
-        <table class="table">
+        <div style="overflow-x:auto;"><table class="table">
           <thead>
             <tr>
               <th>Szenario</th>
@@ -371,7 +440,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
               </tr>
             </sc-for>
           </tbody>
-        </table>
+        </table></div>
         <div style="font-size:12px; color:var(--color-neutral-600);">{{ legendeText }} Sonderzahlungen wirken nur auf das gewählte Darlehen — das andere läuft unverändert weiter und bestimmt ggf. das spätere Schuldenfrei-Datum.</div>
       </div>
     </sc-if>
@@ -405,7 +474,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
           <div style="font-family:var(--font-heading); font-size:20px;">Einlagen & Sondertilgungen</div>
           <button class="btn btn-primary" onClick="{{ verteilungNeu }}">Eintrag hinzufügen</button>
         </div>
-        <table class="table">
+        <div style="overflow-x:auto;"><table class="table">
           <thead>
             <tr><th>Monat</th><th>Art</th><th>Person</th><th>Notiz</th><th style="text-align:right;">Betrag</th></tr>
           </thead>
@@ -420,7 +489,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
               </tr>
             </sc-for>
           </tbody>
-        </table>
+        </table></div>
       </div>
     </sc-if>
 
@@ -436,7 +505,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:14px; align-items:end; border-top:1px solid var(--color-divider); padding-top:12px;">
               <div style="grid-column:1 / -1;">
                 <div style="font-family:var(--font-heading); font-size:16px;">{{ d.name }}</div>
-                <div style="font-size:12px; color:var(--color-neutral-600);">Konto {{ d.konto }} · {{ d.betragFmt }} · Rate zahlt {{ d.zahler }}</div>
+                <div style="font-size:12px; color:var(--color-neutral-600);">Konto {{ d.konto }} · {{ d.betragFmt }} · {{ d.zahlerInfo }}</div>
               </div>
               <div class="field"><label>Sollzins (% p.a.)</label><input type="number" step="0.01" class="input" value="{{ d.zins }}" onChange="{{ d.setZins }}"></div>
               <div class="field"><label>Monatliche Rate (€)</label><input type="number" step="0.01" class="input" value="{{ d.rate }}" onChange="{{ d.setRate }}"></div>
@@ -447,6 +516,35 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
           <div style="display:grid; grid-template-columns:1fr 150px; gap:14px; align-items:end; border-top:1px solid var(--color-divider); padding-top:12px;">
             <div style="font-size:13px; color:var(--color-neutral-700);">Anschlusszins nach der Zinsbindung (Annahme für die Prognose)</div>
             <div class="field"><label>Zins (% p.a.)</label><input type="number" step="0.1" class="input" value="{{ anschlussZins }}" onChange="{{ setAnschluss }}"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-kicker">Verteilung</div>
+          <div class="card-title">Ratenaufteilung</div>
+          <p class="card-body" style="text-wrap:pretty;">Fester Monatsbetrag einer Person an der Gesamtrate ({{ raGesamtFmt }}). Den Rest trägt {{ raAndere }}. Jeder Betrag gilt ab seinem Stichtag bis zum nächsten. Ohne Eintrag zählt die Rate je Darlehen beim jeweiligen Zahler.</p>
+          <div style="display:grid; grid-template-columns:minmax(0,240px); gap:14px;">
+            <div class="field"><label>Fester Anteil von</label>
+              <select class="input" value="{{ raPerson }}" onChange="{{ setRaPerson }}">
+                <option value="">—</option>
+                <sc-for list="{{ raPersonOptionen }}" as="o" hint-placeholder-count="2"><option value="{{ o }}">{{ o }}</option></sc-for>
+              </select>
+            </div>
+          </div>
+          <sc-if value="{{ raHatZeilen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <sc-for list="{{ raZeilen }}" as="r" hint-placeholder-count="1">
+                <div style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)) auto; gap:14px; align-items:end; border-top:1px solid var(--color-divider); padding-top:12px;">
+                  <div class="field"><label>Gilt ab</label><input type="month" class="input" value="{{ r.ab }}" onChange="{{ r.setAb }}"></div>
+                  <div class="field"><label>Monatsbetrag (€)</label><input type="number" step="0.01" class="input" value="{{ r.betrag }}" onChange="{{ r.setBetrag }}" placeholder="z. B. 2062.30"></div>
+                  <div class="field"><label>Rest für {{ raAndere }}</label><div style="padding:8px 0; font-variant-numeric:tabular-nums;">{{ r.restFmt }}</div></div>
+                  <button class="btn btn-ghost" onClick="{{ r.entfernen }}">Entfernen</button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:flex;">
+            <button class="btn btn-secondary" onClick="{{ raHinzu }}">Betrag ab Stichtag hinzufügen</button>
           </div>
         </div>
 
@@ -485,7 +583,7 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
         <div class="card">
           <div class="card-kicker">Sicherheit</div>
           <div class="card-title">PIN-Sperre & Verschlüsselung</div>
-          <p class="card-body" style="text-wrap:pretty;">Verlangt beim Öffnen eine PIN und verschlüsselt damit alles Ende-zu-Ende: das GitHub-Token im Browser und den kompletten Datenstand im Gist. Feld leeren und speichern entfernt die Sperre. PIN sicher im Passwortmanager aufbewahren — ohne PIN sind die Daten nicht wiederherstellbar.</p>
+          <p class="card-body" style="text-wrap:pretty;">Verlangt beim Öffnen eine PIN. Datenstand und GitHub-Token sind dann im Browser, im Gist und in der Sicherungsdatei verschlüsselt (AES-256-GCM, PIN über PBKDF2 mit 600.000 Iterationen). Nach 15 Minuten ohne Bedienung sperrt die App sich selbst. Feld leeren und speichern entfernt die Sperre. PIN sicher im Passwortmanager aufbewahren — ohne PIN sind die Daten nicht wiederherstellbar.</p>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             <input type="password" class="input" style="width:240px;" placeholder="{{ pinPlatzhalter }}" value="{{ pinNeu }}" onChange="{{ setPinNeu }}">
             <button class="btn btn-secondary" onClick="{{ pinSpeichern }}">Speichern</button>
@@ -570,24 +668,27 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
   </sc-if>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;zeigeCents&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;horizontStandard&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Zinsbindung&quot;, &quot;Volltilgung&quot;], &quot;default&quot;: &quot;Zinsbindung&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;zeigeCents&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;horizontStandard&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Zinsbindung&quot;,&quot;Volltilgung&quot;],&quot;default&quot;:&quot;Zinsbindung&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
 class Component extends DCLogic {
   constructor(props) {
     super(props);
     let stand = null;
-    try { stand = JSON.parse(localStorage.getItem('anwesen.stand.v1') || 'null'); } catch (e) {}
+    const encLokal = !!localStorage.getItem('anwesen.stand.enc');
+    try { stand = encLokal ? null : JSON.parse(localStorage.getItem('anwesen.stand.v1') || 'null'); } catch (e) {}
+    const altSperre = !!(stand && stand.einstellungen && stand.einstellungen.sperreHash);
+    const nurTresor = !stand && !!localStorage.getItem('anwesen.tresor.v1');
     this.state = {
       stand: stand || { kosten: [], verteilung: [], darlehen: null, einstellungen: {} },
-      geladen: !!stand,
+      geladen: !!stand || encLokal,
       tab: 'uebersicht',
       fKat: 'Alle',
       modal: null,
       horizont: (props.horizontStandard || 'Zinsbindung') === 'Volltilgung' ? 'ende' : 'bindung',
       szenarien: [{ id: 's1', name: '10.000 € jährlich extra', einmalBetrag: '', einmalYm: '2026-12', einmalDl: '', jBetrag: '10000', jMonat: 12, jDl: '' }],
-      gesperrt: !!(stand && stand.einstellungen && stand.einstellungen.sperreHash) && sessionStorage.getItem('anwesen.entsperrt') !== '1',
+      gesperrt: encLokal || altSperre || nurTresor, pinPruefe: false,
       pinEingabe: '', pinFehler: null, pinNeu: '', pinInfo: null,
       setupBlob: null, setupPass: '', setupFehler: null, setupCodePass: '', setupCodeInfo: null,
-      sync: (() => { try { const r = JSON.parse(localStorage.getItem('anwesen.sync.v1') || 'null') || {}; return r.enc ? { token: '', gistId: r.gistId || '' } : { token: r.token || '', gistId: r.gistId || '' }; } catch (e) { return { token: '', gistId: '' }; } })(),
+      sync: (() => { try { const r = JSON.parse(localStorage.getItem('anwesen.sync.v1') || 'null') || {}; return (r.enc || r.encD) ? { token: '', gistId: r.gistId || '' } : { token: r.token || '', gistId: r.gistId || '' }; } catch (e) { return { token: '', gistId: '' }; } })(),
       syncStatus: null,
       uAuswahl: null, sAuswahl: null,
       eingerichtetFlag: localStorage.getItem('anwesen.eingerichtet.v1') === '1'
@@ -599,90 +700,65 @@ class Component extends DCLogic {
   }
   fmt(v) { return (this.props.zeigeCents ? this.fmtC : this.fmtC0).format(v || 0); }
   fmt2(v) { return this.fmtC.format(v || 0); }
-  ymNum(j, m) { return j * 12 + m - 1; }
+  ymNum(j, m) { return +j * 12 + +m - 1; }
   numYm(n) { return { j: Math.floor(n / 12), m: n % 12 + 1 }; }
   fmtYm(n) { const d = this.numYm(n); return this.monNamen[d.m - 1] + ' ' + d.j; }
   // Letzter abgerechneter Monat: die Bank bucht Rate und Zinsen erst am 30.
-  heuteYm() { const d = new Date(); return this.ymNum(d.getFullYear(), d.getMonth() + 1) - (d.getDate() < 30 ? 1 : 0); }
+  heuteYm() { const d = new Date(); const letzter = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); return this.ymNum(d.getFullYear(), d.getMonth() + 1) - (d.getDate() < Math.min(30, letzter) ? 1 : 0); }
 
-  // ---------- Krypto (Architektur wie PKV-Dashboard) ----------
-  async pinHash(pin) {
+  // ---------- Krypto ----------
+  // Ein zufälliger Datenschlüssel (AES-256-GCM) verschlüsselt Datenstand und Token – lokal und im Gist.
+  // Die PIN schützt nur diesen Schlüssel (PBKDF2-SHA-256, 600.000 Iterationen) und wird durch Entschlüsseln geprüft.
+  // Es gibt keinen PIN-Hash; Schlüssel und PIN liegen nur im Arbeitsspeicher.
+  async pinHashAlt(pin) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('anwesen:' + pin));
     return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
   }
   b64(bytes) { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
   b64ab(s) { return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
   syncRoh() { try { return JSON.parse(localStorage.getItem('anwesen.sync.v1') || 'null'); } catch (e) { return null; } }
-  async schluesselImport(bytes) {
-    const key = await crypto.subtle.importKey('raw', bytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
-    return { key, raw: this.b64(bytes) };
-  }
-  async schluesselAusPin(pin, saltB64) {
-    const mat = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveBits']);
-    const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: this.b64ab(saltB64), iterations: 310000, hash: 'SHA-256' }, mat, 256);
-    return this.schluesselImport(new Uint8Array(bits));
-  }
-  async syncEntschluesseln(roh, key) {
-    const klar = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(roh.iv) }, key, this.b64ab(roh.enc));
-    const g = JSON.parse(new TextDecoder().decode(klar));
-    return { token: g.token || '', gistId: roh.gistId || '' };
-  }
   tresorRoh() { try { return JSON.parse(localStorage.getItem('anwesen.tresor.v1') || 'null'); } catch (e) { return null; } }
-  async datenKeyErmitteln(tresor) {
-    if (this._datenKey) return this._datenKey;
-    const raw = sessionStorage.getItem('anwesen.datenschluessel');
-    if (raw) { try { this._datenKey = (await this.schluesselImport(this.b64ab(raw))).key; return this._datenKey; } catch (e) {} }
-    const t = tresor || this.tresorRoh();
-    if (t && this._pin) {
-      try {
-        const k = await this.schluesselAusPin(this._pin, t.salt);
-        const bytes = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(t.iv) }, k.key, this.b64ab(t.key)));
-        const imp = await this.schluesselImport(bytes);
-        this._datenKey = imp.key;
-        sessionStorage.setItem('anwesen.datenschluessel', imp.raw);
-        localStorage.setItem('anwesen.tresor.v1', JSON.stringify(t));
-        return this._datenKey;
-      } catch (e) {}
-    }
-    return null;
+  sperreAktiv() { const e = (this.state.stand && this.state.stand.einstellungen) || {}; return !!(e.sperre || e.sperreHash) || !!localStorage.getItem('anwesen.stand.enc'); }
+  async pinSchluessel(pin, saltB64, iter) {
+    const mat = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: this.b64ab(saltB64), iterations: iter, hash: 'SHA-256' }, mat, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
   }
-  async datenKeyErzeugen() {
-    const bytes = crypto.getRandomValues(new Uint8Array(32));
-    const imp = await this.schluesselImport(bytes);
-    this._datenKey = imp.key;
-    sessionStorage.setItem('anwesen.datenschluessel', imp.raw);
-    const salt = this.b64(crypto.getRandomValues(new Uint8Array(16)));
-    const k = await this.schluesselAusPin(this._pin, salt);
+  async aesEnc(key, obj) {
     const iv = crypto.getRandomValues(new Uint8Array(12));
-    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k.key, bytes);
-    localStorage.setItem('anwesen.tresor.v1', JSON.stringify({ salt, iv: this.b64(iv), key: this.b64(new Uint8Array(ct)) }));
-    return this._datenKey;
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(obj)));
+    return { iv: this.b64(iv), daten: this.b64(new Uint8Array(ct)) };
+  }
+  async aesDec(key, b) {
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(b.iv) }, key, this.b64ab(b.daten));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  async tresorOeffnen(pin, t) {
+    const k = await this.pinSchluessel(pin, t.salt, t.iter || 310000);
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(t.iv) }, k, this.b64ab(t.key)));
+  }
+  async tresorSchliessen(pin, bytes) {
+    const salt = this.b64(crypto.getRandomValues(new Uint8Array(16)));
+    const k = await this.pinSchluessel(pin, salt, 600000);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, bytes);
+    const t = { v: 2, iter: 600000, salt, iv: this.b64(iv), key: this.b64(new Uint8Array(ct)) };
+    localStorage.setItem('anwesen.tresor.v1', JSON.stringify(t));
+    return t;
+  }
+  async datenKeySetzen(bytes) {
+    this._datenKey = await crypto.subtle.importKey('raw', bytes, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    this._datenBytes = bytes;
   }
   async syncPersistieren(c) {
-    if (this._pinKey && this._pinSalt && c.token) {
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const geheim = new TextEncoder().encode(JSON.stringify({ token: c.token || '' }));
-      const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, this._pinKey, geheim);
-      localStorage.setItem('anwesen.sync.v1', JSON.stringify({ enc: this.b64(new Uint8Array(enc)), iv: this.b64(iv), salt: this._pinSalt, gistId: c.gistId || '' }));
-    } else {
-      localStorage.setItem('anwesen.sync.v1', JSON.stringify(c));
+    if (!this.sperreAktiv()) { localStorage.setItem('anwesen.sync.v1', JSON.stringify(c)); return; }
+    if (this._datenKey) {
+      const b = c.token ? await this.aesEnc(this._datenKey, { token: c.token }) : null;
+      localStorage.setItem('anwesen.sync.v1', JSON.stringify(b ? { encD: 1, ...b, gistId: c.gistId || '' } : { gistId: c.gistId || '' }));
     }
   }
   async syncStart() {
     const roh = this.syncRoh();
-    if (roh && roh.enc) {
-      const raw = sessionStorage.getItem('anwesen.schluessel');
-      if (raw) {
-        try {
-          const k = await this.schluesselImport(this.b64ab(raw));
-          const sync = await this.syncEntschluesseln(roh, k.key);
-          this._pinKey = k.key; this._pinSalt = roh.salt;
-          this.setState({ sync });
-          if (sync.token && sync.gistId) this.syncLoad(true);
-        } catch (e) { sessionStorage.removeItem('anwesen.schluessel'); }
-      }
-      return;
-    }
+    if (this.state.gesperrt || (roh && (roh.enc || roh.encD))) return; // wartet auf die PIN
     if (this.state.sync && this.state.sync.token && this.state.sync.gistId) { this.syncLoad(true); }
     else fetch('setup.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(b => { if (b && b.daten) this.setState({ setupBlob: b }); }).catch(() => {});
   }
@@ -724,36 +800,64 @@ class Component extends DCLogic {
   }
   async entsperren() {
     const pin = this.state.pinEingabe || '';
-    const hash = await this.pinHash(pin);
-    if (hash !== (this.state.stand.einstellungen || {}).sperreHash) {
-      this.setState({ pinFehler: 'PIN falsch.', pinEingabe: '' });
-      return;
-    }
-    sessionStorage.setItem('anwesen.entsperrt', '1');
-    this._pin = pin;
-    let syncNeu = null;
+    if (!pin || this.state.pinPruefe) return;
+    this.setState({ pinFehler: null, pinPruefe: true });
+    const t = this._remoteTresor || this.tresorRoh();
+    let bytes = null;
     try {
-      const roh = this.syncRoh();
-      if (roh && roh.enc) {
-        const k = await this.schluesselAusPin(pin, roh.salt);
-        syncNeu = await this.syncEntschluesseln(roh, k.key);
-        this._pinKey = k.key; this._pinSalt = roh.salt;
-        sessionStorage.setItem('anwesen.schluessel', k.raw);
-      } else if (roh && roh.token) {
-        const salt = this.b64(crypto.getRandomValues(new Uint8Array(16)));
-        const k = await this.schluesselAusPin(pin, salt);
-        this._pinKey = k.key; this._pinSalt = salt;
-        sessionStorage.setItem('anwesen.schluessel', k.raw);
-        await this.syncPersistieren(this.state.sync);
+      if (t) bytes = await this.tresorOeffnen(pin, t);
+      else {
+        const e = (this.state.stand && this.state.stand.einstellungen) || {};
+        if (e.sperreHash && await this.pinHashAlt(pin) === e.sperreHash) bytes = crypto.getRandomValues(new Uint8Array(32));
       }
+    } catch (err) { bytes = null; }
+    if (!bytes) { this.setState({ pinFehler: 'PIN falsch.', pinEingabe: '', pinPruefe: false }); return; }
+    await this.datenKeySetzen(bytes);
+    this._pin = pin;
+    if (!t || (t.iter || 310000) < 600000) await this.tresorSchliessen(pin, bytes);
+    else localStorage.setItem('anwesen.tresor.v1', JSON.stringify(t));
+    this._remoteTresor = null;
+    let stand = this.state.stand;
+    const quelle = this._pendingEnc || (() => { try { return JSON.parse(localStorage.getItem('anwesen.stand.enc') || 'null'); } catch (e) { return null; } })();
+    this._pendingEnc = null;
+    if (quelle) { try { stand = await this.aesDec(this._datenKey, quelle); delete stand.gespeichert; } catch (e) { stand = { kosten: [], verteilung: [], darlehen: null, einstellungen: {} }; } }
+    let sync = this.state.sync;
+    const roh = this.syncRoh();
+    try {
+      if (roh && roh.encD) sync = { token: (await this.aesDec(this._datenKey, roh)).token || '', gistId: roh.gistId || '' };
+      else if (roh && roh.enc) { const k = await this.pinSchluessel(pin, roh.salt, 310000); sync = { token: (await this.aesDec(k, { iv: roh.iv, daten: roh.enc })).token || '', gistId: roh.gistId || '' }; }
     } catch (e) {}
-    try { await this.datenKeyErmitteln(null); } catch (e) {}
-    this.setState({ gesperrt: false, pinEingabe: '', pinFehler: null, ...(syncNeu ? { sync: syncNeu } : {}) }, () => {
-      const c = this.state.sync;
-      if (c && c.token && c.gistId) this.syncLoad(true);
+    const einst = { ...(stand.einstellungen || {}), sperre: true }; delete einst.sperreHash;
+    ['anwesen.entsperrt', 'anwesen.schluessel', 'anwesen.datenschluessel'].forEach(k => sessionStorage.removeItem(k));
+    this.setState({ stand: { kosten: stand.kosten || [], verteilung: stand.verteilung || [], darlehen: stand.darlehen || null, einstellungen: einst }, sync, gesperrt: false, geladen: true, pinEingabe: '', pinFehler: null, pinPruefe: false }, async () => {
+      await this.syncPersistieren(sync);
+      this.persist(true);
+      if (sync.token && sync.gistId) this.syncLoad(true);
     });
+    this.aktivitaet(true);
   }
+  async sperren() {
+    if (!this.sperreAktiv() || !this._datenKey || this.state.gesperrt) return;
+    if (this._syncT) { clearTimeout(this._syncT); this._syncT = null; await this.syncUpload(true); }
+    await this._persistLauf;
+    this._datenKey = null; this._datenBytes = null; this._pin = null;
+    this.setState({ gesperrt: true, modal: null, pinEingabe: '', syncStatus: null, stand: { kosten: [], verteilung: [], darlehen: null, einstellungen: { sperre: true } }, sync: { token: '', gistId: this.state.sync.gistId || '' } });
+  }
+  // Automatische Sperre nach 15 Minuten ohne Bedienung
+  aktivitaet(sofort) {
+    const jetzt = Date.now();
+    if (!sofort && this._letzteAkt && jetzt - this._letzteAkt < 5000) return;
+    this._letzteAkt = jetzt;
+    clearTimeout(this._lockT);
+    this._lockT = setTimeout(() => this.sperren(), 15 * 60 * 1000);
+  }
+  componentWillUnmount() { document.removeEventListener('keydown', this._esc); ['pointerdown', 'keydown', 'scroll', 'mousemove'].forEach(e => window.removeEventListener(e, this._akt)); clearTimeout(this._lockT); }
   componentDidMount() {
+    this._esc = ev => { if (ev.key === 'Escape' && this.state.modal) this.setState({ modal: null }); };
+    document.addEventListener('keydown', this._esc);
+    this._akt = () => this.aktivitaet();
+    ['pointerdown', 'keydown', 'scroll', 'mousemove'].forEach(e => window.addEventListener(e, this._akt, { passive: true }));
+    this.aktivitaet(true);
     this.syncStart();
     // data/stand.json übernehmen, wenn lokal nichts liegt oder die Datei neuer ist als der lokale Stand
     // Verschlüsselte Variante ({v,salt,iv,daten}) wartet auf das Einrichtungs-Passwort; Klartext nur als Entwicklungs-Fallback.
@@ -770,7 +874,20 @@ class Component extends DCLogic {
     this.setState({ stand: { kosten: s.kosten || [], verteilung: s.verteilung || [], darlehen: s.darlehen, einstellungen: { ...(alt.einstellungen || {}), ...(s.einstellungen || {}) } }, geladen: true, standBlob: null }, () => this.persist(true));
   }
   persist(ohneUpload) {
-    localStorage.setItem('anwesen.stand.v1', JSON.stringify(this.state.stand));
+    if (this.sperreAktiv()) {
+      // gesperrt: nur verschlüsselt ablegen; ohne Schlüssel nichts schreiben
+      if (this._datenKey) {
+        const seq = this._persistSeq = (this._persistSeq || 0) + 1;
+        this._persistLauf = this.aesEnc(this._datenKey, this.state.stand).then(b => {
+          if (seq !== this._persistSeq) return;
+          localStorage.setItem('anwesen.stand.enc', JSON.stringify(b));
+          localStorage.removeItem('anwesen.stand.v1');
+        });
+      } else return;
+    } else {
+      localStorage.setItem('anwesen.stand.v1', JSON.stringify(this.state.stand));
+      localStorage.removeItem('anwesen.stand.enc');
+    }
     localStorage.setItem('anwesen.stand.ts', new Date().toISOString());
     if (!ohneUpload && this.state.sync && this.state.sync.token && this.state.sync.gistId) {
       clearTimeout(this._syncT);
@@ -791,14 +908,10 @@ class Component extends DCLogic {
       if (!auto) this.setState({ syncStatus: 'Lade hoch …' });
       const stand = this.standObjekt();
       let dateiInhalt;
-      const sperre = (this.state.stand.einstellungen || {}).sperreHash;
-      if (sperre) {
-        let key = await this.datenKeyErmitteln(null);
-        if (!key && this._pin) key = await this.datenKeyErzeugen();
-        if (!key) { this.setState({ syncStatus: 'Hochladen wartet — zum verschlüsselten Sync bitte einmal mit der PIN entsperren.' }); return; }
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(stand)));
-        dateiInhalt = JSON.stringify({ verschluesselt: true, gespeichert: stand.gespeichert, sperreHash: sperre, tresor: this.tresorRoh(), iv: this.b64(iv), daten: this.b64(new Uint8Array(ct)) }, null, 1);
+      if (this.sperreAktiv()) {
+        const t = this.tresorRoh();
+        if (!this._datenKey || !t) { this.setState({ syncStatus: 'Hochladen wartet — bitte mit der PIN entsperren.' }); return; }
+        dateiInhalt = JSON.stringify({ verschluesselt: true, v: 2, tresor: t, ...(await this.aesEnc(this._datenKey, stand)) }, null, 1);
       } else {
         dateiInhalt = JSON.stringify(stand, null, 1);
       }
@@ -829,14 +942,19 @@ class Component extends DCLogic {
       if (!f) throw new Error('anwesen-stand.json nicht im Gist gefunden');
       let s = JSON.parse(f.truncated ? await (await fetch(f.raw_url)).text() : f.content);
       if (s && s.verschluesselt) {
-        const key = await this.datenKeyErmitteln(s.tresor);
-        if (!key) {
-          if (s.sperreHash) this.setStand({ einstellungen: { ...this.state.stand.einstellungen, sperreHash: s.sperreHash } }, true);
-          this.setState({ gesperrt: sessionStorage.getItem('anwesen.entsperrt') !== '1', syncStatus: 'Daten sind Ende-zu-Ende verschlüsselt — zum Laden bitte mit der PIN entsperren.' });
+        let klar = null;
+        if (this._datenKey) { try { klar = await this.aesDec(this._datenKey, s); } catch (e) {} }
+        if (!klar && s.tresor && this._pin) {
+          try { await this.datenKeySetzen(await this.tresorOeffnen(this._pin, s.tresor)); klar = await this.aesDec(this._datenKey, s); localStorage.setItem('anwesen.tresor.v1', JSON.stringify(s.tresor)); } catch (e) {}
+        }
+        if (!klar) {
+          if (s.tresor) { this._remoteTresor = s.tresor; if (!this.tresorRoh()) localStorage.setItem('anwesen.tresor.v1', JSON.stringify(s.tresor)); }
+          this.setState({ gesperrt: true, syncStatus: 'Daten sind Ende-zu-Ende verschlüsselt — bitte mit der PIN entsperren.' });
           return;
         }
-        const klar = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: this.b64ab(s.iv) }, key, this.b64ab(s.daten));
-        s = JSON.parse(new TextDecoder().decode(klar));
+        const lt = this.tresorRoh();
+        if (s.tresor && (!lt || (s.tresor.iter || 310000) >= (lt.iter || 310000))) localStorage.setItem('anwesen.tresor.v1', JSON.stringify(s.tresor));
+        s = klar;
       }
       if (!Array.isArray(s.kosten)) throw new Error('kein gültiger Stand in der Datei');
       const remoteTs = s.gespeichert || '';
@@ -846,8 +964,10 @@ class Component extends DCLogic {
         const lokalHatDaten = !!(this.state.stand && this.state.stand.darlehen);
         if (lokalHatDaten && lokalTs && remoteTs && remoteTs < lokalTs) { this.syncUpload(true); return; }
       }
-      const einst = s.einstellungen || {};
-      const sperren = !!einst.sperreHash && sessionStorage.getItem('anwesen.entsperrt') !== '1';
+      const einst = { ...(s.einstellungen || {}) };
+      const mitSperre = !!(einst.sperre || einst.sperreHash);
+      if (mitSperre && this._datenKey) { delete einst.sperreHash; einst.sperre = true; }
+      const sperren = mitSperre && !this._datenKey;
       this.setState({ stand: { kosten: s.kosten, verteilung: s.verteilung || [], darlehen: s.darlehen, einstellungen: einst }, geladen: true, eingerichtetFlag: true, gesperrt: sperren }, () => this.persist(true));
       localStorage.setItem('anwesen.sync.ts', remoteTs);
       localStorage.setItem('anwesen.eingerichtet.v1', '1');
@@ -856,12 +976,18 @@ class Component extends DCLogic {
       this.setState({ syncStatus: 'Laden fehlgeschlagen: ' + (err && err.message ? err.message : err) });
     }
   }
-  standHerunterladen() {
-    const blob = new Blob([JSON.stringify(this.standObjekt(), null, 1)], { type: 'application/json' });
+  async standHerunterladen() {
+    let inhalt;
+    if (this.sperreAktiv()) {
+      const t = this.tresorRoh();
+      if (!this._datenKey || !t) return;
+      inhalt = JSON.stringify({ verschluesselt: true, v: 2, tresor: t, ...(await this.aesEnc(this._datenKey, this.standObjekt())) }, null, 1);
+    } else inhalt = JSON.stringify(this.standObjekt(), null, 1);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
+    a.href = URL.createObjectURL(new Blob([inhalt], { type: 'application/json' }));
     a.download = 'anwesen-stand.json';
     a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
   // ---------- Tilgungssimulation ----------
@@ -878,10 +1004,10 @@ class Component extends DCLogic {
       }
     });
     (extra || []).forEach(e => { if (e.dl === dlKey && e.betrag > 0) sonder[e.n] = (sonder[e.n] || 0) + e.betrag; });
-    let saldo = dl.betrag, zinsen = 0, ende = null, restBind = 0;
+    let saldo = +dl.betrag, zinsen = 0, ende = null, restBind = 0;
     const punkte = [[start - 1, saldo]];
     const jahre = {};
-    const istN = dl.istJahr && dl.istMonat && dl.istRest > 0 ? this.ymNum(+dl.istJahr, +dl.istMonat) : null;
+    const istN = dl.istJahr && dl.istMonat && +dl.istRest > 0 ? this.ymNum(+dl.istJahr, +dl.istMonat) : null;
     for (let n = start; n < start + 780; n++) {
       const j = this.numYm(n).j;
       const zs = (n <= bind ? +dl.zins : anschluss) / 1200 * saldo;
@@ -908,9 +1034,9 @@ class Component extends DCLogic {
   }
   kombiPunkte(a, b) {
     const map = new Map();
-    [a, b].forEach(s => s.punkte.forEach(p => map.set(p[0], (map.get(p[0]) || 0))));
+    [a, b].forEach(s => s.punkte.forEach(p => map.set(p[0], 0)));
     const ns = [...map.keys()].sort((x, y) => x - y);
-    return ns.map(n => [n, this.saldoBei(a, n) * (n >= a.punkte[0][0] ? 1 : 1) + this.saldoBei(b, n)]);
+    return ns.map(n => [n, this.saldoBei(a, n) + this.saldoBei(b, n)]);
   }
   ersterDl() { return Object.keys((this.state.stand && this.state.stand.darlehen) || {})[0] || ''; }
   szenarioExtra(sz) {
@@ -964,7 +1090,7 @@ class Component extends DCLogic {
     const grid = [];
     for (let v = 0; v <= ymax; v += ymax / 4) grid.push({ y: +Y(v).toFixed(1), label: Math.round(v / 1000) + ' T€' });
     const xticks = [];
-    const spanne = this.numYm(n1).j - 2025;
+    const spanne = this.numYm(n1).j - this.numYm(n0).j;
     const schritt = spanne > 14 ? 4 : spanne > 10 ? 2 : 1;
     for (let j = this.numYm(n0).j + 1; j <= this.numYm(n1).j; j += schritt) xticks.push({ x: +X(this.ymNum(j, 1)).toFixed(1), label: String(j) });
     const erg = { linien, grid, xticks, n0, n1 };
@@ -1004,9 +1130,9 @@ class Component extends DCLogic {
       }
     }, kinder);
   }
-  szAendern(id, patch) {
-    this.setState(s => ({ szenarien: s.szenarien.map(x => x.id === id ? { ...x, ...patch } : x) }));
-  }
+  szListe() { const e = (this.state.stand && this.state.stand.einstellungen) || {}; return Array.isArray(e.szenarien) ? e.szenarien : this.state.szenarien; }
+  szSetzen(liste) { this.setStand({ einstellungen: { ...(this.state.stand.einstellungen || {}), szenarien: liste } }); }
+  szAendern(id, patch) { this.szSetzen(this.szListe().map(x => x.id === id ? { ...x, ...patch } : x)); }
   setModal(patch) { this.setState(s => ({ modal: { ...s.modal, ...patch } })); }
 
   renderVals() {
@@ -1040,6 +1166,7 @@ class Component extends DCLogic {
         f.text().then(t => {
           const s = JSON.parse(t);
           if (s.daten && s.salt) { this.setState({ standBlob: s, importFehler: null, setupFehler: null }); return; }
+          if (s.verschluesselt && s.tresor) { this._pendingEnc = s; this._remoteTresor = s.tresor; this.setState({ gesperrt: true, importFehler: null }); return; }
           if (!s.darlehen) throw new Error('kein Datenstand');
           this.setState({ importFehler: null });
           this.standUebernehmen(s);
@@ -1050,6 +1177,9 @@ class Component extends DCLogic {
       setPinEingabe: ev => this.setState({ pinEingabe: ev.target.value }),
       pinKeyDown: ev => { if (ev.key === 'Enter') this.entsperren(); },
       entsperrenKlick: () => this.entsperren(),
+      entsperrenLabel: st.pinPruefe ? 'Prüfe …' : 'Entsperren',
+      zeigeSperren: !st.gesperrt && !!this._datenKey && this.sperreAktiv(),
+      sperrenKlick: () => this.sperren(),
       tabUebersicht: st.tab === 'uebersicht', tabKosten: st.tab === 'kosten', tabFinanzierung: st.tab === 'finanzierung',
       tabSimulation: st.tab === 'simulation', tabVerteilung: st.tab === 'verteilung', tabEinstellungen: st.tab === 'einstellungen',
       standLabel: this.fmtYm(heute),
@@ -1084,6 +1214,40 @@ class Component extends DCLogic {
     const fSum = gefiltert.reduce((a, k) => a + (+k.kosten || 0), 0);
     const fBez = gefiltert.reduce((a, k) => a + (+k.bezahlt || 0), 0);
     const fHw = gefiltert.reduce((a, k) => a + (+k.handwerker || 0), 0);
+    const katFarben = ['var(--color-accent-800)', 'var(--color-accent)', 'var(--color-accent-300)', 'var(--color-neutral-800)', 'var(--color-neutral-500)', 'var(--color-neutral-300)', 'var(--color-accent-600)', 'var(--color-neutral-700)'];
+    const katSummen = katSet.map(kat => ({ kat, v: kosten.filter(k => k.kategorie === kat).reduce((a, k) => a + (+k.kosten || 0), 0) })).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
+    const katTotal = katSummen.reduce((a, x) => a + x.v, 0) || 1;
+    const UMF = 2 * Math.PI * 70;
+    let katCum = 0;
+    const katPct = v => (v / katTotal * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %';
+    const katTop = katSummen.slice(0, 10), katRest = katSummen.slice(10);
+    const restSum = katRest.reduce((a, x) => a + x.v, 0);
+    const restHover = { onMouseEnter: () => this.setState({ katRestOffen: true }), onMouseLeave: () => this.setState({ katRestOffen: false }) };
+    out.katHatRest = katRest.length > 0;
+    out.katRestOffen = !!st.katRestOffen && katRest.length > 0;
+    out.katRestEnter = restHover.onMouseEnter; out.katRestLeave = restHover.onMouseLeave;
+    out.katRestZeile = { name: 'Sonstige (' + katRest.length + ')', wertFmt: fmt(restSum), pctFmt: katPct(restSum), bg: st.katRestOffen ? 'var(--color-neutral-100)' : 'transparent' };
+    out.katRestZeilen = katRest.map(x => ({ name: x.kat, wertFmt: fmt(x.v), pctFmt: katPct(x.v), bg: st.fKat === x.kat ? 'var(--color-accent-100)' : 'transparent', go: () => this.setState({ fKat: st.fKat === x.kat ? 'Alle' : x.kat }) }));
+    const restLen = restSum / katTotal * UMF;
+    out.katRestSeg = { dash: Math.max(0, restLen - 1.5) + ' ' + (UMF - Math.max(0, restLen - 1.5)), offset: -(katTop.reduce((a, x) => a + x.v, 0) / katTotal * UMF), breite: st.katRestOffen ? 34 : 24, titel: 'Sonstige: ' + fmt(restSum) };
+    const katFarbenTop = [...katFarben, 'var(--color-accent-900)', 'var(--color-neutral-900)'];
+    out.katSegmente = katTop.map((x, i) => {
+      const len = x.v / katTotal * UMF, aktiv = st.fKat === x.kat;
+      const seg = {
+        name: x.kat, farbe: katFarbenTop[i % katFarbenTop.length], wertFmt: fmt(x.v),
+        pctFmt: (x.v / katTotal * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %',
+        titel: x.kat + ': ' + fmt(x.v),
+        dash: Math.max(0, len - 1.5) + ' ' + (UMF - Math.max(0, len - 1.5)), offset: -katCum,
+        breite: aktiv ? 34 : 24,
+        bg: aktiv ? 'var(--color-accent-100)' : 'transparent',
+        go: () => this.setState({ fKat: aktiv ? 'Alle' : x.kat })
+      };
+      katCum += len;
+      return seg;
+    });
+    const katAkt = katSummen.find(x => x.kat === st.fKat);
+    out.katMitteWert = katAkt ? (katAkt.v / katTotal * 100).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' %' : fmt(katSummen.length ? katTotal : 0);
+    out.katMitteLabel = katAkt ? katAkt.kat : 'Gesamt';
     Object.assign(out, {
       kategorien: ['Alle', ...katSet], kategorienRoh: katSet,
       fKat: st.fKat, setFKat: ev => this.setState({ fKat: ev.target.value }),
@@ -1143,11 +1307,17 @@ class Component extends DCLogic {
         { label: 'Eigenkapital', wert: fmt(ekSum), sub: 'gemeinsam eingebracht' },
         { label: 'Sondertilgungen', wert: fmt(sonderSum(K1) + sonderSum(K2)), sub: 'bisher geleistet' }
       ];
+      const uVoll = st.uHorizont === 'ende';
       const uCh = this.chart([
         { name: 'Gesamt', farbe: 'var(--color-neutral-800)', punkte: this.kombiPunkte(basisM, basisW), dash: 'none' },
         { name: basisM.dl.name, farbe: 'var(--color-accent)', punkte: basisM.punkte },
         { name: basisW.dl.name, farbe: 'var(--color-neutral-500)', punkte: basisW.punkte, dash: '5 4' }
-      ], basisM.bind, st.uAuswahl);
+      ], uVoll ? Math.min(Math.max(basisM.ende || 0, basisW.ende || 0, basisM.bind) + 6, this.ymNum(2078, 1)) : basisM.bind, st.uAuswahl);
+      out.uTitel = uVoll ? 'Restschuld bis zur vollständigen Abzahlung' : 'Restschuld bis zum Ende der Zinsbindung';
+      out.uHorizontOpts = [
+        { label: 'Zinsbindung', aktiv: !uVoll, go: () => this.setState({ uHorizont: 'bindung', uAuswahl: null }) },
+        { label: 'Vollständige Abzahlung', aktiv: uVoll, go: () => this.setState({ uHorizont: 'ende', uAuswahl: null }) }
+      ];
       out.uChart = uCh;
       out.uChartSvg = this.chartSvg(uCh, 'u');
       out.uHatAuswahl = !!uCh.auswahl;
@@ -1174,7 +1344,7 @@ class Component extends DCLogic {
       const basisKombi = this.kombiPunkte(basisM, basisW);
       const basisZ = basisM.zinsen + basisW.zinsen;
       const basisEnde = Math.max(basisM.ende || 0, basisW.ende || 0);
-      const szErg = st.szenarien.map((sz, i) => {
+      const szErg = this.szListe().map((sz, i) => {
         const extra = this.szenarioExtra(sz);
         const m = this.sim(K1, extra, anschluss);
         const w = this.sim(K2, extra, anschluss);
@@ -1186,8 +1356,9 @@ class Component extends DCLogic {
         szErg.forEach(e => { const en = Math.max(e.m.ende || 0, e.w.ende || 0); if (en > n1) n1 = en; });
         n1 = Math.min(n1 + 6, this.ymNum(2078, 1));
       }
-      out.anschlussZins = anschluss;
-      out.setAnschluss = ev => this.setStand({ einstellungen: { ...stand.einstellungen, anschlussZins: parseFloat(ev.target.value) || 0 } });
+      out.anschlussZins = (stand.einstellungen || {}).anschlussZins ?? anschluss;
+      out.anschlussAbJahr = +D1.bindungJahr + 1;
+      out.setAnschluss = ev => this.setStand({ einstellungen: { ...stand.einstellungen, anschlussZins: ev.target.value } });
       out.horizontOpts = [
         { label: 'Bis Zinsbindung ' + D1.bindungJahr, aktiv: st.horizont === 'bindung', go: () => this.setState({ horizont: 'bindung' }) },
         { label: 'Bis Volltilgung', aktiv: st.horizont === 'ende', go: () => this.setState({ horizont: 'ende' }) }
@@ -1203,10 +1374,10 @@ class Component extends DCLogic {
         setJBetrag: ev => this.szAendern(e.sz.id, { jBetrag: ev.target.value }),
         setJMonat: ev => this.szAendern(e.sz.id, { jMonat: +ev.target.value }),
         setJDl: ev => this.szAendern(e.sz.id, { jDl: ev.target.value }),
-        entfernen: () => this.setState(s => ({ szenarien: s.szenarien.filter(x => x.id !== e.sz.id) })),
-        warnung: this.kontingentWarnungen(e.extra, '').filter(w => this.kontingentWarnungen(null, '').indexOf(w) < 0).join(' ') || (parseFloat(e.sz.einmalBetrag) > 0 && parseFloat(e.sz.einmalBetrag) < 1000 ? 'Mindestbetrag je Sondertilgung laut Vertrag: 1.000 €.' : null)
+        entfernen: () => this.szSetzen(this.szListe().filter(x => x.id !== e.sz.id)),
+        warnung: this.kontingentWarnungen(e.extra, '').filter(w => this.kontingentWarnungen(null, '').indexOf(w) < 0).join(' ') || ([e.sz.einmalBetrag, e.sz.jBetrag].some(b => parseFloat(b) > 0 && parseFloat(b) < 1000) ? 'Mindestbetrag je Sondertilgung laut Vertrag: 1.000 €.' : null)
       }));
-      out.szHinzu = () => this.setState(s => ({ szenarien: [...s.szenarien, { id: 's' + Date.now(), name: 'Szenario ' + (s.szenarien.length + 1), einmalBetrag: '', einmalYm: '2026-12', einmalDl: K1, jBetrag: '', jMonat: 12, jDl: K1 }] }));
+      out.szHinzu = () => { const l = this.szListe(); const d = this.numYm(heute + 1); this.szSetzen([...l, { id: 's' + Date.now(), name: 'Szenario ' + (l.length + 1), einmalBetrag: '', einmalYm: d.j + '-' + String(d.m).padStart(2, '0'), einmalDl: K1, jBetrag: '', jMonat: 12, jDl: K1 }]); };
       const sCh = this.chart([
         { name: 'Basis (tatsächlicher Kurs)', farbe: 'var(--color-accent)', punkte: basisKombi },
         ...szErg.map(e => ({ name: e.sz.name, farbe: e.farbe, punkte: e.kombi }))
@@ -1217,7 +1388,7 @@ class Component extends DCLogic {
       out.sKeineAuswahl = !sCh.auswahl;
       out.sAuswahlDatum = sCh.auswahl ? this.fmtYm(sCh.auswahl.n) : '';
       out.sAuswahlWerte = sCh.auswahl ? sCh.auswahl.punkte.map(p => ({ name: p.name, farbe: p.farbe, wert: this.fmt2(p.wert) })) : [];
-      const endeLabel = n => n ? this.fmtYm(n) : 'über 2088 hinaus';
+      const endeLabel = n => n ? this.fmtYm(n) : 'nach ' + this.numYm(basisM.start + 779).j;
       const diffLabel = d => d > 0 ? '−' + (Math.floor(d / 12) ? Math.floor(d / 12) + ' J ' : '') + (d % 12) + ' M' : '±0';
       out.szMetriken = [
         { name: 'Basis (tatsächlicher Kurs)', farbe: 'var(--color-accent)', restBind: fmt(basisM.restBind + basisW.restBind), endeM: kz1 + ' ' + endeLabel(basisM.ende), endeW: kz2 + ' ' + endeLabel(basisW.ende), zinsen: fmt(basisZ), ersparnis: '—', kuerzerM: '—', kuerzerW: '' },
@@ -1238,16 +1409,36 @@ class Component extends DCLogic {
       // Verteilung
       const vert = stand.verteilung || [];
       const monateSeitStart = Math.max(0, heute - this.ymNum(+D1.startJahr, +D1.startMonat) + 1);
+      // Ratenaufteilung: fester Anteil einer Person ab Stichtag, Rest trägt die andere
+      const einst = stand.einstellungen || {};
+      const ra = einst.ratenAufteilung || { person: '', perioden: [] };
+      const raPer = (ra.perioden || []).filter(p => p.ab && +p.betrag > 0).map(p => { const t = p.ab.split('-'); return { n: this.ymNum(+t[0], +t[1]), b: +p.betrag }; }).sort((a, b) => a.n - b.n);
+      const gesamtRate = Object.values(dls).reduce((a, d) => a + (+d.rate || 0), 0);
+      const startN = this.ymNum(+D1.startJahr, +D1.startMonat);
+      const andere = personen.find(p => p !== ra.person);
+      const monatsAnteil = n => {
+        const r = {}; personen.forEach(p => r[p] = 0);
+        const per = ra.person && personen.includes(ra.person) ? raPer.filter(p => p.n <= n).pop() : null;
+        if (per) { const f = Math.min(per.b, gesamtRate); r[ra.person] += f; if (andere) r[andere] += gesamtRate - f; }
+        else Object.values(dls).forEach(d => { if (d.zahler in r) r[d.zahler] += +d.rate || 0; });
+        return r;
+      };
+      const ratenSumme = {}; personen.forEach(p => ratenSumme[p] = 0);
+      for (let n = startN; n <= heute; n++) { const r = monatsAnteil(n); personen.forEach(p => ratenSumme[p] += r[p]); }
+      const aktuell = monatsAnteil(Math.max(heute, startN));
+      const aufteilungAktiv = !!(ra.person && raPer.some(p => p.n <= Math.max(heute, startN)));
+      out.darlehenKarten = out.darlehenKarten.map(k => ({ ...k, rateLabel: 'Monatliche Rate' }));
+      if (aufteilungAktiv) out.zahlerText = ra.person + ' zahlt aktuell ' + this.fmt2(aktuell[ra.person]) + ' der Gesamtrate von ' + this.fmt2(gesamtRate) + (andere ? ', ' + andere + ' den Rest (' + this.fmt2(aktuell[andere]) + ')' : '') + '; ältere Zeiträume gemäß den Stichtagen in den Einstellungen';
       out.personKarten = personen.map(name => {
         const dlKey = Object.keys(dls).find(k => dls[k].zahler === name);
         const dl = dlKey ? dls[dlKey] : null;
         const ek = vert.filter(v => v.person === name && v.typ === 'EK').reduce((a, v) => a + (+v.betrag || 0), 0);
         const so = vert.filter(v => v.person === name && v.typ === 'Sondertilgung').reduce((a, v) => a + (+v.betrag || 0), 0);
-        const raten = dl ? monateSeitStart * (+dl.rate) : 0;
+        const raten = ratenSumme[name] || 0;
         return {
-          name, rolle: dl ? 'zahlt Rate ' + dl.name : '',
+          name, rolle: aufteilungAktiv ? (name === ra.person ? 'fester Ratenanteil' : 'Restbetrag der Rate') : (dl ? 'zahlt Rate ' + dl.name : ''),
           ekFmt: fmt(ek), sonderFmt: fmt(so),
-          rateInfo: dl ? monateSeitStart + ' × ' + this.fmt2(+dl.rate) : '—',
+          rateInfo: monateSeitStart + ' Mon., aktuell ' + this.fmt2(aktuell[name] || 0),
           ratenFmt: fmt(raten), gesamtFmt: fmt(ek + so + raten),
           gesamt: ek + so + raten
         };
@@ -1270,19 +1461,41 @@ class Component extends DCLogic {
         this.setState({ modal: { art: 'verteilung', id: null, typ: 'EK', person: personen[0] || '', jahr: d.getFullYear(), monat: d.getMonth() + 1, betrag: '', darlehen: K1, notiz: '', fehler: null } });
       };
 
+      // Einstellungen — Ratenaufteilung
+      const setRa = neu => this.setStand({ einstellungen: { ...einst, ratenAufteilung: { ...ra, ...neu } } });
+      const perListe = ra.perioden || [];
+      out.raPerson = ra.person || '';
+      out.raPersonOptionen = personen;
+      out.setRaPerson = ev => setRa({ person: ev.target.value });
+      out.raGesamtFmt = this.fmt2(gesamtRate);
+      out.raAndere = andere || 'die andere Person';
+      out.raHatZeilen = perListe.length > 0;
+      out.raZeilen = perListe.map((p, i) => ({
+        ab: p.ab || '', betrag: p.betrag ?? '',
+        restFmt: +p.betrag > 0 ? this.fmt2(Math.max(0, gesamtRate - p.betrag)) : '—',
+        setAb: ev => setRa({ perioden: perListe.map((q, j) => j === i ? { ...q, ab: ev.target.value } : q) }),
+        setBetrag: ev => setRa({ perioden: perListe.map((q, j) => j === i ? { ...q, betrag: ev.target.value } : q) }),
+        entfernen: () => setRa({ perioden: perListe.filter((q, j) => j !== i) })
+      }));
+      out.raHinzu = () => {
+        const ab = perListe.length ? (() => { const d = this.numYm(heute + 1); return d.j + '-' + String(d.m).padStart(2, '0'); })() : D1.startJahr + '-' + String(D1.startMonat).padStart(2, '0');
+        setRa({ person: ra.person || personen[0] || '', perioden: [...perListe, { ab, betrag: '' }] });
+      };
+
       // Einstellungen — Darlehen
       out.sDarlehen = Object.keys(dls).map(key => ({
         name: dls[key].name, konto: dls[key].konto, betragFmt: fmt(dls[key].betrag), zahler: dls[key].zahler,
+        zahlerInfo: aufteilungAktiv ? 'Rate gemeinsam, siehe Ratenaufteilung' : 'Rate zahlt ' + dls[key].zahler,
         zins: dls[key].zins, rate: dls[key].rate,
-        setZins: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], zins: parseFloat(ev.target.value) || 0 } } }),
-        setRate: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], rate: parseFloat(ev.target.value) || 0 } } }),
+        setZins: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], zins: ev.target.value } } }),
+        setRate: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], rate: ev.target.value } } }),
         istYm: dls[key].istJahr ? dls[key].istJahr + '-' + String(dls[key].istMonat).padStart(2, '0') : '',
         istRest: dls[key].istRest || '',
         setIstYm: ev => { const t = (ev.target.value || '').split('-'); this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], istJahr: +t[0] || null, istMonat: +t[1] || null } } }); },
-        setIstRest: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], istRest: parseFloat(ev.target.value) || 0 } } })
+        setIstRest: ev => this.setStand({ darlehen: { ...dls, [key]: { ...dls[key], istRest: ev.target.value } } })
       }));
     } else {
-      Object.assign(out, { darlehenKarten: [], kennzahlen: [], uChart: { grid: [], xticks: [], linien: [] }, uChartSvg: null, uHatAuswahl: false, uKeineAuswahl: false, uAuswahlDatum: '', uAuswahlWerte: [], finBloecke: [], szKarten: [], sChart: { grid: [], xticks: [], linien: [] }, sChartSvg: null, sHatAuswahl: false, sKeineAuswahl: false, sAuswahlDatum: '', sAuswahlWerte: [], szMetriken: [], personKarten: [], verteilungZeilen: [], sDarlehen: [], horizontOpts: [], anschlussZins: 4, warnungenIst: [], hatWarnungen: false, saldoText: '', verteilungNeu: () => {}, szHinzu: () => {}, setAnschluss: () => {} });
+      Object.assign(out, { darlehenKarten: [], kennzahlen: [], uChart: { grid: [], xticks: [], linien: [] }, uChartSvg: null, uHorizontOpts: [], uTitel: '', uHatAuswahl: false, uKeineAuswahl: false, uAuswahlDatum: '', uAuswahlWerte: [], finBloecke: [], szKarten: [], sChart: { grid: [], xticks: [], linien: [] }, sChartSvg: null, sHatAuswahl: false, sKeineAuswahl: false, sAuswahlDatum: '', sAuswahlWerte: [], szMetriken: [], personKarten: [], verteilungZeilen: [], sDarlehen: [], raZeilen: [], raPersonOptionen: [], raHatZeilen: false, raHinzu: () => {}, setRaPerson: () => {}, horizontOpts: [], anschlussZins: 4, warnungenIst: [], hatWarnungen: false, saldoText: '', verteilungNeu: () => {}, szHinzu: () => {}, setAnschluss: () => {} });
     }
 
     // ---------- Einstellungen: Sync, Setup, PIN ----------
@@ -1308,39 +1521,26 @@ class Component extends DCLogic {
         this.setState({ setupCodeInfo: 'setup.json erzeugt — neben die Website ins Repo legen.', setupCodePass: '' });
       },
       pinNeu: st.pinNeu, pinInfo: st.pinInfo,
-      pinPlatzhalter: (stand.einstellungen || {}).sperreHash ? 'Neue PIN (leer = Sperre aus)' : 'PIN festlegen (min. 8 Zeichen)',
+      pinPlatzhalter: this.sperreAktiv() ? 'Neue PIN (leer = Sperre aus)' : 'PIN festlegen (min. 8 Zeichen)',
       setPinNeu: ev => this.setState({ pinNeu: ev.target.value }),
       pinSpeichern: async () => {
         const p = (st.pinNeu || '').trim();
         if (!p) {
-          sessionStorage.removeItem('anwesen.entsperrt');
-          sessionStorage.removeItem('anwesen.schluessel');
-          this._pinKey = null; this._pinSalt = null;
-          await this.syncPersistieren(this.state.sync);
-          const einst = { ...stand.einstellungen }; delete einst.sperreHash;
-          this.setStand({ einstellungen: einst });
-          this.setState({ pinNeu: '', pinInfo: 'Sperre entfernt — Token und Datenstand liegen wieder unverschlüsselt.' });
+          if (!this.sperreAktiv()) return;
+          localStorage.removeItem('anwesen.stand.enc'); localStorage.removeItem('anwesen.tresor.v1');
+          this._datenKey = null; this._datenBytes = null; this._pin = null;
+          const einst = { ...stand.einstellungen }; delete einst.sperreHash; delete einst.sperre;
+          this.setState(s => ({ stand: { ...s.stand, einstellungen: einst }, pinNeu: '', pinInfo: 'Sperre entfernt — Token und Datenstand liegen wieder unverschlüsselt.' }), async () => { await this.syncPersistieren(this.state.sync); this.persist(); });
           return;
         }
-        if (p.length < 8) { this.setState({ pinInfo: 'Bitte mindestens 8 Zeichen — die PIN verschlüsselt auch das GitHub-Token.' }); return; }
-        const hash = await this.pinHash(p);
-        sessionStorage.setItem('anwesen.entsperrt', '1');
-        try { await this.datenKeyErmitteln(null); } catch (e) {}
-        const salt = this.b64(crypto.getRandomValues(new Uint8Array(16)));
-        const k = await this.schluesselAusPin(p, salt);
-        this._pinKey = k.key; this._pinSalt = salt; this._pin = p;
-        sessionStorage.setItem('anwesen.schluessel', k.raw);
-        await this.syncPersistieren(this.state.sync);
-        const dkRaw = sessionStorage.getItem('anwesen.datenschluessel');
-        if (dkRaw) {
-          const salt2 = this.b64(crypto.getRandomValues(new Uint8Array(16)));
-          const k2 = await this.schluesselAusPin(p, salt2);
-          const iv2 = crypto.getRandomValues(new Uint8Array(12));
-          const ct2 = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv2 }, k2.key, this.b64ab(dkRaw));
-          localStorage.setItem('anwesen.tresor.v1', JSON.stringify({ salt: salt2, iv: this.b64(iv2), key: this.b64(new Uint8Array(ct2)) }));
-        }
-        this.setStand({ einstellungen: { ...stand.einstellungen, sperreHash: hash } });
-        this.setState({ pinNeu: '', pinInfo: 'Sperre aktiv — gilt über den Sync auf allen Geräten ab dem nächsten Öffnen.' });
+        if (p.length < 8) { this.setState({ pinInfo: 'Bitte mindestens 8 Zeichen — die PIN schützt Datenstand und GitHub-Token.' }); return; }
+        this.setState({ pinInfo: 'Verschlüssele …' });
+        const bytes = this._datenBytes || crypto.getRandomValues(new Uint8Array(32));
+        await this.datenKeySetzen(bytes);
+        await this.tresorSchliessen(p, bytes);
+        this._pin = p;
+        const einst = { ...stand.einstellungen, sperre: true }; delete einst.sperreHash;
+        this.setState(s => ({ stand: { ...s.stand, einstellungen: einst }, pinNeu: '', pinInfo: 'Sperre aktiv. Datenstand und Token sind lokal und im Gist verschlüsselt. Andere Geräte übernehmen die neue PIN beim nächsten Sync.' }), async () => { await this.syncPersistieren(this.state.sync); this.persist(); this.aktivitaet(true); });
       }
     });
 
