@@ -84,15 +84,6 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
             <div style="font-size:12.5px; color:var(--color-accent-800); text-align:center;">{{ importFehler }}</div>
           </sc-if>
         </div>
-        <div style="border-top:1px solid var(--color-divider); padding-top:12px; display:flex; flex-direction:column; gap:8px;">
-          <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--color-neutral-600);">Mit bestehendem Gist verbinden</div>
-          <div class="field"><label>GitHub-Token</label><input type="password" class="input" value="{{ syncToken }}" onChange="{{ setSyncToken }}" placeholder="github_pat_…"></div>
-          <div class="field"><label>Gist-ID</label><input class="input" value="{{ syncGist }}" onChange="{{ setSyncGist }}"></div>
-          <button class="btn btn-secondary btn-block" onClick="{{ syncRunter }}">Verbinden & laden</button>
-          <sc-if value="{{ syncStatus }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:12.5px; color:var(--color-neutral-700); text-align:center;">{{ syncStatus }}</div>
-          </sc-if>
-        </div>
       </div>
     </sc-if>
 
