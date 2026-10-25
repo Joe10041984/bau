@@ -3,8 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://api.github.com https://gist.githubusercontent.com; object-src 'none'; base-uri 'none'; form-action 'none'">
-<meta name="referrer" content="no-referrer">
-<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
 </head>
@@ -68,14 +66,14 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
     <sc-if value="{{ ohneDaten }}" hint-placeholder-val="{{ false }}">
       <div class="dialog" style="max-width:420px; margin:70px auto 0 auto; display:flex; flex-direction:column; gap:14px;">
         <div class="dialog-title" style="text-align:center;">Gesperrt</div>
-        <p style="margin:0; font-size:13px; color:var(--color-neutral-700); text-align:center; text-wrap:pretty;">Auf diesem Gerät ist noch kein Datenstand eingerichtet.</p>
+        <p style="margin:0; font-size:13px; color:var(--color-neutral-700); text-align:center; text-wrap:pretty;">{{ ohneDatenText }}</p>
         <sc-if value="{{ zeigeSetupPass }}" hint-placeholder-val="{{ false }}">
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <input type="password" class="input" autoFocus="{{ true }}" placeholder="Einrichtungs-Passwort" value="{{ setupPass }}" onChange="{{ setSetupPass }}" onKeyDown="{{ setupKeyDown }}" style="text-align:center;">
+            <input type="password" class="input" autoFocus="{{ true }}" placeholder="PIN" value="{{ setupPass }}" onChange="{{ setSetupPass }}" onKeyDown="{{ setupKeyDown }}" style="text-align:center;">
             <sc-if value="{{ setupFehler }}" hint-placeholder-val="{{ false }}">
               <div style="font-size:12.5px; color:var(--color-accent-800); text-align:center;">{{ setupFehler }}</div>
             </sc-if>
-            <button class="btn btn-primary btn-block" onClick="{{ setupKlick }}">Entsperren</button>
+            <button class="btn btn-primary btn-block" onClick="{{ setupKlick }}">{{ setupLabel }}</button>
           </div>
         </sc-if>
         <div style="border-top:1px solid var(--color-divider); padding-top:12px; display:flex; flex-direction:column; gap:8px;">
@@ -108,8 +106,8 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
           <div class="card" style="background:var(--color-surface);">
             <div class="card-kicker">Einrichtung</div>
             <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <span style="font-size:13.5px; flex:1; min-width:220px;">Einrichtungs-Passwort eingeben — Zugangsdaten und Datenstand werden automatisch geladen.</span>
-              <input type="password" class="input" style="width:220px;" placeholder="Einrichtungs-Passwort" value="{{ setupPass }}" onChange="{{ setSetupPass }}" onKeyDown="{{ setupKeyDown }}">
+              <span style="font-size:13.5px; flex:1; min-width:220px;">PIN eingeben — Zugangsdaten und Datenstand werden automatisch geladen.</span>
+              <input type="password" class="input" style="width:220px;" placeholder="PIN" value="{{ setupPass }}" onChange="{{ setSetupPass }}" onKeyDown="{{ setupKeyDown }}">
               <button class="btn btn-primary" onClick="{{ setupKlick }}">Verbinden</button>
             </div>
             <sc-if value="{{ setupFehler }}" hint-placeholder-val="{{ false }}">
@@ -568,12 +566,10 @@ a { color: var(--color-accent-700); } a:hover { color: var(--color-accent-800); 
 
         <div class="card">
           <div class="card-kicker">Neue Geräte</div>
-          <div class="card-title">Verschlüsselte Dateien fürs Repo</div>
-          <p class="card-body" style="text-wrap:pretty;">Beide Dateien werden mit dem Einrichtungs-Passwort verschlüsselt (AES-256-GCM, 600.000 PBKDF2-Iterationen). setup.json enthält Token und Gist-ID, data/stand.json den Datenstand. Neue Geräte brauchen dann nur das Passwort. Dasselbe Passwort für beide verwenden.</p>
+          <div class="card-title">Anmelden nur mit der PIN</div>
+          <p class="card-body" style="text-wrap:pretty;">setup.json enthält Token und Gist-ID, verschlüsselt mit deiner PIN (AES-256-GCM, 600.000 PBKDF2-Iterationen). Liegt sie neben der Website im Repo, braucht jedes neue Gerät und jeder Browser nach dem Löschen der Daten nur noch die PIN. Die Datei ist öffentlich, deshalb verlangt sie eine PIN mit mindestens 12 Zeichen, am besten 4–5 Wörter. Nach einem PIN-Wechsel neu erzeugen.</p>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <input type="password" class="input" style="width:240px;" placeholder="Einrichtungs-Passwort" value="{{ setupCodePass }}" onChange="{{ setSetupCodePass }}">
             <button class="btn btn-secondary" onClick="{{ setupErzeugen }}">setup.json erzeugen</button>
-            <button class="btn btn-secondary" onClick="{{ standVerschluesseln }}">stand.json verschlüsseln</button>
           </div>
           <sc-if value="{{ setupCodeInfo }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:12.5px; color:var(--color-neutral-700);">{{ setupCodeInfo }}</div>
@@ -687,7 +683,7 @@ class Component extends DCLogic {
       szenarien: [{ id: 's1', name: '10.000 € jährlich extra', einmalBetrag: '', einmalYm: '2026-12', einmalDl: '', jBetrag: '10000', jMonat: 12, jDl: '' }],
       gesperrt: encLokal || altSperre || nurTresor, pinPruefe: false,
       pinEingabe: '', pinFehler: null, pinNeu: '', pinInfo: null,
-      setupBlob: null, setupPass: '', setupFehler: null, setupCodePass: '', setupCodeInfo: null,
+      setupBlob: null, setupPass: '', setupFehler: null, setupLaeuft: false, setupCodePass: '', setupCodeInfo: null,
       sync: (() => { try { const r = JSON.parse(localStorage.getItem('anwesen.sync.v1') || 'null') || {}; return (r.enc || r.encD) ? { token: '', gistId: r.gistId || '' } : { token: r.token || '', gistId: r.gistId || '' }; } catch (e) { return { token: '', gistId: '' }; } })(),
       syncStatus: null,
       uAuswahl: null, sAuswahl: null,
@@ -781,23 +777,32 @@ class Component extends DCLogic {
     return JSON.parse(new TextDecoder().decode(pt));
   }
   async setupAnwenden() {
-    const pass = (this.state.setupPass || '').trim();
-    if (!pass) { this.setState({ setupFehler: 'Bitte Passwort eingeben.' }); return; }
-    this.setState({ setupFehler: null });
+    const pin = (this.state.setupPass || '').trim();
+    if (!pin || this.state.setupLaeuft) { if (!pin) this.setState({ setupFehler: 'Bitte PIN eingeben.' }); return; }
+    this.setState({ setupFehler: null, setupLaeuft: true });
     try {
-      if (this.state.standBlob) this.standUebernehmen(await this.setupEntschluesseln(pass, this.state.standBlob));
+      if (this.state.standBlob) this.standUebernehmen(await this.setupEntschluesseln(pin, this.state.standBlob));
       if (this.state.setupBlob && !this.state.sync.token) {
-        const c = await this.setupEntschluesseln(pass, this.state.setupBlob);
+        const c = await this.setupEntschluesseln(pin, this.state.setupBlob);
         if (!c.token || !c.gistId) throw new Error('unvollständig');
-        this.speichereSync({ token: c.token, gistId: c.gistId });
-        this.setState({ setupPass: '' });
+        // Token erst nach dem Laden speichern, dann bereits verschlüsselt
+        this._pin = pin;
+        await new Promise(r => this.setState({ sync: { token: c.token, gistId: c.gistId } }, r));
         await this.syncLoad(false);
+        if (!this._datenKey) {
+          this.setState({ setupLaeuft: false, setupPass: '', setupFehler: 'Zugang geladen, Datenstand ließ sich nicht öffnen: ' + (this.state.syncStatus || 'unbekannter Fehler') });
+          return;
+        }
+        await this.syncPersistieren(this.state.sync);
+        this.aktivitaet(true);
       }
-      this.setState({ setupPass: '' });
+      this.setState({ setupPass: '', setupLaeuft: false });
     } catch (e) {
-      this.setState({ setupFehler: 'Entschlüsselung fehlgeschlagen — Passwort falsch?' });
+      this._pin = this._datenKey ? this._pin : null;
+      this.setState({ setupFehler: 'PIN falsch.', setupPass: '', setupLaeuft: false });
     }
   }
+
   async entsperren() {
     const pin = this.state.pinEingabe || '';
     if (!pin || this.state.pinPruefe) return;
@@ -1159,6 +1164,8 @@ class Component extends DCLogic {
       ohneDaten: !st.gesperrt && !(st.stand && st.stand.darlehen),
       kopfAdresse: !st.gesperrt && st.stand && st.stand.darlehen ? Object.values(st.stand.darlehen).map(d => d.objekt).join(' · ') : '',
       zeigeSetupPass: !!st.setupBlob || !!st.standBlob,
+      ohneDatenText: st.setupBlob && !st.sync.token ? 'Mit der PIN anmelden — Zugang und Datenstand werden geladen.' : 'Auf diesem Gerät ist noch kein Datenstand eingerichtet.',
+      setupLabel: st.setupLaeuft ? 'Prüfe …' : 'Entsperren',
       importFehler: st.importFehler,
       dateiImport: ev => {
         const f = ev.target.files && ev.target.files[0];
@@ -1510,15 +1517,17 @@ class Component extends DCLogic {
       setupCodePass: st.setupCodePass, setupCodeInfo: st.setupCodeInfo,
       setSetupCodePass: ev => this.setState({ setupCodePass: ev.target.value }),
       setupErzeugen: async () => {
-        const pass = (st.setupCodePass || '').trim();
-        if (pass.length < 8) { this.setState({ setupCodeInfo: 'Bitte mindestens 8 Zeichen.' }); return; }
-        if (!st.sync.token || !st.sync.gistId) { this.setState({ setupCodeInfo: 'Erst Token und Gist-ID hinterlegen (und einmal hochladen).' }); return; }
-        const inhalt = await this.setupVerschluesseln(pass, { token: st.sync.token, gistId: st.sync.gistId });
+        if (!this._pin || !this._datenKey) { this.setState({ setupCodeInfo: 'Erst eine PIN festlegen und entsperren.' }); return; }
+        if (this._pin.length < 12) { this.setState({ setupCodeInfo: 'Die PIN hat weniger als 12 Zeichen. Für eine öffentliche Datei zu kurz — bitte zuerst unter „PIN-Sperre“ eine längere PIN setzen (z. B. 4–5 Wörter).' }); return; }
+        if (!st.sync.token || !st.sync.gistId) { this.setState({ setupCodeInfo: 'Erst Token hinterlegen und einmal hochladen (legt den Gist an).' }); return; }
+        const inhalt = JSON.parse(await this.setupVerschluesseln(this._pin, { token: st.sync.token, gistId: st.sync.gistId }));
+        inhalt.v = 2; inhalt.art = 'pin';
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([inhalt], { type: 'application/json' }));
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(inhalt, null, 1)], { type: 'application/json' }));
         a.download = 'setup.json';
         a.click();
-        this.setState({ setupCodeInfo: 'setup.json erzeugt — neben die Website ins Repo legen.', setupCodePass: '' });
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        this.setState({ setupCodeInfo: 'setup.json erzeugt — neben index.html ins Repo legen (alte Datei ersetzen).' });
       },
       pinNeu: st.pinNeu, pinInfo: st.pinInfo,
       pinPlatzhalter: this.sperreAktiv() ? 'Neue PIN (leer = Sperre aus)' : 'PIN festlegen (min. 8 Zeichen)',
@@ -1533,14 +1542,14 @@ class Component extends DCLogic {
           this.setState(s => ({ stand: { ...s.stand, einstellungen: einst }, pinNeu: '', pinInfo: 'Sperre entfernt — Token und Datenstand liegen wieder unverschlüsselt.' }), async () => { await this.syncPersistieren(this.state.sync); this.persist(); });
           return;
         }
-        if (p.length < 8) { this.setState({ pinInfo: 'Bitte mindestens 8 Zeichen — die PIN schützt Datenstand und GitHub-Token.' }); return; }
+        if (p.length < 8) { this.setState({ pinInfo: 'Bitte mindestens 8 Zeichen — die PIN schützt Datenstand und GitHub-Token. Für die Anmeldung nur mit PIN (setup.json) mindestens 12.' }); return; }
         this.setState({ pinInfo: 'Verschlüssele …' });
         const bytes = this._datenBytes || crypto.getRandomValues(new Uint8Array(32));
         await this.datenKeySetzen(bytes);
         await this.tresorSchliessen(p, bytes);
         this._pin = p;
         const einst = { ...stand.einstellungen, sperre: true }; delete einst.sperreHash;
-        this.setState(s => ({ stand: { ...s.stand, einstellungen: einst }, pinNeu: '', pinInfo: 'Sperre aktiv. Datenstand und Token sind lokal und im Gist verschlüsselt. Andere Geräte übernehmen die neue PIN beim nächsten Sync.' }), async () => { await this.syncPersistieren(this.state.sync); this.persist(); this.aktivitaet(true); });
+        this.setState(s => ({ stand: { ...s.stand, einstellungen: einst }, pinNeu: '', pinInfo: 'Sperre aktiv. Datenstand und Token sind lokal und im Gist verschlüsselt. Andere Geräte übernehmen die neue PIN beim nächsten Sync. Falls du setup.json nutzt: neu erzeugen und im Repo ersetzen.' }), async () => { await this.syncPersistieren(this.state.sync); this.persist(); this.aktivitaet(true); });
       }
     });
 

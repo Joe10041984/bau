@@ -43,16 +43,14 @@ Token kopieren – er wird nur einmal angezeigt.
 2. Einstellungen → **PIN setzen** (vor dem ersten Hochladen, sonst landet der Stand unverschlüsselt im Gist).
 3. Token eintragen, Gist-ID leer lassen → „Hochladen“. Die App legt einen privaten Gist an und merkt sich die ID.
 
-## 4. Weitere Geräte
+## 4. Weitere Geräte – nur mit der PIN
 
-Empfohlen: Token und Gist-ID im Passwortmanager ablegen und auf dem neuen Gerät unter „Mit bestehendem Gist verbinden“ eintragen, danach PIN eingeben.
+1. Auf dem eingerichteten Gerät: PIN mit mindestens 12 Zeichen setzen (z. B. 4–5 Wörter).
+2. Einstellungen → „Anmelden nur mit der PIN“ → **setup.json erzeugen**.
+3. `setup.json` neben `index.html` ins Repo legen.
+4. Neues Gerät: Website öffnen, PIN eingeben. Token, Gist-ID und Datenstand werden geladen.
 
-Alternativ über `setup.json` (liegt öffentlich, nur mit langem Einrichtungs-Passwort):
-
-1. Einstellungen → Einrichtungs-Passwort (mind. 8 Zeichen) → „setup.json erzeugen“.
-2. Optional mit demselben Passwort „stand.json verschlüsseln“.
-3. `setup.json` ins Repo-Root, `stand.json` nach `data/` hochladen.
-4. Neues Gerät: Pages-URL öffnen → Einrichtungs-Passwort → PIN.
+Nach jedem PIN-Wechsel setup.json neu erzeugen und ersetzen. Wird das Token erneuert, ebenso.
 
 ## Token erneuern
 
